@@ -1,0 +1,211 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum PostStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  FAILED
+}
+
+enum Platform {
+  INSTAGRAM
+  FACEBOOK
+  WHATSAPP
+  TIKTOK
+}
+
+enum OrderStatus {
+  PENDING
+  INTERESTED
+  CONFIRMED
+  PAID
+  CANCELLED
+}
+
+model User {
+  id              String            @id @default(uuid())
+  email           String            @unique
+  name            String?
+  password        String
+  avatarUrl       String?
+  emailVerified   Boolean           @default(false)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  deletedAt       DateTime?
+  workspaces      WorkspaceMember[]
+}
+
+model Workspace {
+  id          String            @id @default(uuid())
+  name        String
+  plan        String            @default("FREE")
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  members     WorkspaceMember[]
+  accounts    SocialAccount[]
+  posts       Post[]
+  products    Product[]
+  customers   Customer[]
+  orders      Order[]
+  subscription Subscription?
+}
+
+model WorkspaceMember {
+  id          String    @id @default(uuid())
+  userId      String
+  workspaceId String
+  role        UserRole  @default(MEMBER)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id])
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+
+  @@unique([userId, workspaceId])
+}
+
+model SocialAccount {
+  id                String    @id @default(uuid())
+  workspaceId       String
+  platform          Platform
+  platformAccountId String
+  accessToken       String    // Encrypted
+  refreshToken      String?   // Encrypted
+  tokenExpiresAt    DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+
+  @@unique([platform, platformAccountId])
+}
+
+model Post {
+  id          String       @id @default(uuid())
+  workspaceId String
+  content     String
+  mediaUrls   String[]
+  status      PostStatus   @default(DRAFT)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  targets     PostTarget[]
+  metrics     EngagementMetric[]
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+}
+
+model PostTarget {
+  id          String     @id @default(uuid())
+  postId      String
+  platform    Platform
+  status      PostStatus @default(SCHEDULED)
+  scheduledFor DateTime
+  publishedAt DateTime?
+  errorMessage String?
+
+  post Post @relation(fields: [postId], references: [id])
+}
+
+model EngagementMetric {
+  id          String   @id @default(uuid())
+  postId      String
+  platform    Platform
+  impressions Int      @default(0)
+  likes       Int      @default(0)
+  comments    Int      @default(0)
+  clicks      Int      @default(0)
+  recordedAt  DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id])
+}
+
+model Subscription {
+  id                 String    @id @default(uuid())
+  workspaceId        String    @unique
+  plan               String
+  status             String
+  paystackCustomerId String?
+  currentPeriodEnd   DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+}
+
+// Commerce Tables
+
+model Product {
+  id          String   @id @default(uuid())
+  workspaceId String
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  currency    String   @default("NGN")
+  imageUrl    String?
+  stock       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  orderItems OrderItem[]
+}
+
+model Customer {
+  id                 String   @id @default(uuid())
+  workspaceId        String
+  name               String
+  email              String?
+  phone              String?
+  platform           Platform?
+  platformCustomerId String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  orders    Order[]
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  workspaceId String
+  customerId  String
+  status      OrderStatus @default(PENDING)
+  totalAmount Decimal     @db.Decimal(10, 2)
+  currency    String      @default("NGN")
+  paymentLink String?
+  paidAt      DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  customer  Customer  @relation(fields: [customerId], references: [id])
+  items     OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+}
