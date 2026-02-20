@@ -25,10 +25,10 @@ let SocialController = class SocialController {
         this.socialService = socialService;
     }
     async createPost(createPostDto) {
-        return this.socialService.createPost(createPostDto.workspaceId, createPostDto.content, createPostDto.mediaUrls || [], createPostDto.targets.map(t => ({
+        return this.socialService.createPost(createPostDto.workspaceId, createPostDto.content, createPostDto.mediaUrls || [], createPostDto.targets.map((t) => ({
             platform: t.platform,
-            scheduledFor: new Date(t.scheduledFor)
-        })));
+            scheduledFor: new Date(t.scheduledFor),
+        })), createPostDto.productIds);
     }
     async getPosts(workspaceId) {
         return this.socialService.getPosts(workspaceId);
@@ -62,7 +62,10 @@ __decorate([
 __decorate([
     (0, common_1.Post)('accounts'),
     (0, swagger_1.ApiOperation)({ summary: 'Link a social account' }),
-    (0, swagger_1.ApiResponse)({ status: 201, description: 'Social account linked successfully' }),
+    (0, swagger_1.ApiResponse)({
+        status: 201,
+        description: 'Social account linked successfully',
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [link_account_dto_1.LinkAccountDto]),

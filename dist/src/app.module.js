@@ -35,6 +35,8 @@ exports.AppModule = AppModule = __decorate([
                     connection: {
                         host: configService.get('REDIS_HOST'),
                         port: configService.get('REDIS_PORT'),
+                        username: configService.get('REDIS_USER'),
+                        password: configService.get('REDIS_PASSWORD'),
                     },
                 }),
                 inject: [config_1.ConfigService],

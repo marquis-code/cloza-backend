@@ -39,40 +39,40 @@ enum OrderStatus {
 }
 
 model User {
-  id              String            @id @default(uuid())
-  email           String            @unique
-  name            String?
-  password        String
-  avatarUrl       String?
-  emailVerified   Boolean           @default(false)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  deletedAt       DateTime?
-  workspaces      WorkspaceMember[]
+  id            String            @id @default(uuid())
+  email         String            @unique
+  name          String?
+  password      String
+  avatarUrl     String?
+  emailVerified Boolean           @default(false)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  deletedAt     DateTime?
+  workspaces    WorkspaceMember[]
 }
 
 model Workspace {
-  id          String            @id @default(uuid())
-  name        String
-  plan        String            @default("FREE")
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-  members     WorkspaceMember[]
-  accounts    SocialAccount[]
-  posts       Post[]
-  products    Product[]
-  customers   Customer[]
-  orders      Order[]
+  id           String            @id @default(uuid())
+  name         String
+  plan         String            @default("FREE")
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  members      WorkspaceMember[]
+  accounts     SocialAccount[]
+  posts        Post[]
+  products     Product[]
+  customers    Customer[]
+  orders       Order[]
   subscription Subscription?
 }
 
 model WorkspaceMember {
-  id          String    @id @default(uuid())
+  id          String   @id @default(uuid())
   userId      String
   workspaceId String
-  role        UserRole  @default(MEMBER)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  role        UserRole @default(MEMBER)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   user      User      @relation(fields: [userId], references: [id])
   workspace Workspace @relation(fields: [workspaceId], references: [id])
@@ -85,8 +85,8 @@ model SocialAccount {
   workspaceId       String
   platform          Platform
   platformAccountId String
-  accessToken       String    // Encrypted
-  refreshToken      String?   // Encrypted
+  accessToken       String // Encrypted
+  refreshToken      String? // Encrypted
   tokenExpiresAt    DateTime?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
@@ -97,26 +97,28 @@ model SocialAccount {
 }
 
 model Post {
-  id          String       @id @default(uuid())
+  id          String             @id @default(uuid())
   workspaceId String
   content     String
   mediaUrls   String[]
-  status      PostStatus   @default(DRAFT)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  status      PostStatus         @default(DRAFT)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
   targets     PostTarget[]
   metrics     EngagementMetric[]
+  products    Product[]
+  orders      Order[]
 
   workspace Workspace @relation(fields: [workspaceId], references: [id])
 }
 
 model PostTarget {
-  id          String     @id @default(uuid())
-  postId      String
-  platform    Platform
-  status      PostStatus @default(SCHEDULED)
+  id           String     @id @default(uuid())
+  postId       String
+  platform     Platform
+  status       PostStatus @default(SCHEDULED)
   scheduledFor DateTime
-  publishedAt DateTime?
+  publishedAt  DateTime?
   errorMessage String?
 
   post Post @relation(fields: [postId], references: [id])
@@ -163,20 +165,21 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  workspace  Workspace   @relation(fields: [workspaceId], references: [id])
   orderItems OrderItem[]
+  posts      Post[]
 }
 
 model Customer {
-  id                 String   @id @default(uuid())
+  id                 String    @id @default(uuid())
   workspaceId        String
   name               String
   email              String?
   phone              String?
   platform           Platform?
   platformCustomerId String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   workspace Workspace @relation(fields: [workspaceId], references: [id])
   orders    Order[]
@@ -194,9 +197,11 @@ model Order {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  workspace Workspace @relation(fields: [workspaceId], references: [id])
-  customer  Customer  @relation(fields: [customerId], references: [id])
-  items     OrderItem[]
+  workspace    Workspace   @relation(fields: [workspaceId], references: [id])
+  customer     Customer    @relation(fields: [customerId], references: [id])
+  items        OrderItem[]
+  sourcePostId String?
+  sourcePost   Post?       @relation(fields: [sourcePostId], references: [id])
 }
 
 model OrderItem {

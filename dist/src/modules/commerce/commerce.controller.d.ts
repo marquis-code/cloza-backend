@@ -6,39 +6,39 @@ export declare class CommerceController {
     private commerceService;
     constructor(commerceService: CommerceService);
     createProduct(createProductDto: CreateProductDto): Promise<{
-        name: string;
         id: string;
+        name: string;
         createdAt: Date;
         updatedAt: Date;
-        workspaceId: string;
         description: string | null;
         price: import("@prisma/client-runtime-utils").Decimal;
         currency: string;
         imageUrl: string | null;
         stock: number;
         active: boolean;
+        workspaceId: string;
     }>;
     getProducts(workspaceId: string): Promise<{
-        name: string;
         id: string;
+        name: string;
         createdAt: Date;
         updatedAt: Date;
-        workspaceId: string;
         description: string | null;
         price: import("@prisma/client-runtime-utils").Decimal;
         currency: string;
         imageUrl: string | null;
         stock: number;
         active: boolean;
+        workspaceId: string;
     }[]>;
     createOrder(createOrderDto: CreateOrderDto): Promise<{
         customer: {
-            name: string;
             id: string;
-            email: string | null;
+            name: string;
             createdAt: Date;
             updatedAt: Date;
             workspaceId: string;
+            email: string | null;
             phone: string | null;
             platform: import("@prisma/client").$Enums.Platform | null;
             platformCustomerId: string | null;
@@ -47,76 +47,79 @@ export declare class CommerceController {
             id: string;
             price: import("@prisma/client-runtime-utils").Decimal;
             quantity: number;
-            orderId: string;
             productId: string;
+            orderId: string;
         }[];
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        workspaceId: string;
         currency: string;
+        workspaceId: string;
         status: import("@prisma/client").$Enums.OrderStatus;
         totalAmount: import("@prisma/client-runtime-utils").Decimal;
         paymentLink: string | null;
         paidAt: Date | null;
         customerId: string;
+        sourcePostId: string | null;
     }>;
     getOrders(workspaceId: string): Promise<({
         customer: {
-            name: string;
             id: string;
-            email: string | null;
+            name: string;
             createdAt: Date;
             updatedAt: Date;
             workspaceId: string;
+            email: string | null;
             phone: string | null;
             platform: import("@prisma/client").$Enums.Platform | null;
             platformCustomerId: string | null;
         };
         items: ({
             product: {
-                name: string;
                 id: string;
+                name: string;
                 createdAt: Date;
                 updatedAt: Date;
-                workspaceId: string;
                 description: string | null;
                 price: import("@prisma/client-runtime-utils").Decimal;
                 currency: string;
                 imageUrl: string | null;
                 stock: number;
                 active: boolean;
+                workspaceId: string;
             };
         } & {
             id: string;
             price: import("@prisma/client-runtime-utils").Decimal;
             quantity: number;
-            orderId: string;
             productId: string;
+            orderId: string;
         })[];
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        workspaceId: string;
         currency: string;
+        workspaceId: string;
         status: import("@prisma/client").$Enums.OrderStatus;
         totalAmount: import("@prisma/client-runtime-utils").Decimal;
         paymentLink: string | null;
         paidAt: Date | null;
         customerId: string;
+        sourcePostId: string | null;
     })[]>;
     updateStatus(id: string, updateOrderStatusDto: UpdateOrderStatusDto): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        workspaceId: string;
         currency: string;
+        workspaceId: string;
         status: import("@prisma/client").$Enums.OrderStatus;
         totalAmount: import("@prisma/client-runtime-utils").Decimal;
         paymentLink: string | null;
         paidAt: Date | null;
         customerId: string;
+        sourcePostId: string | null;
     }>;
 }

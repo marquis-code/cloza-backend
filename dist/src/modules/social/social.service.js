@@ -25,7 +25,7 @@ let SocialService = class SocialService {
         this.prisma = prisma;
         this.postQueue = postQueue;
     }
-    async createPost(workspaceId, content, mediaUrls, targets) {
+    async createPost(workspaceId, content, mediaUrls, targets, productIds) {
         const post = await this.prisma.post.create({
             data: {
                 workspaceId,
@@ -39,9 +39,15 @@ let SocialService = class SocialService {
                         status: client_1.PostStatus.SCHEDULED,
                     })),
                 },
+                products: productIds?.length
+                    ? {
+                        connect: productIds.map((id) => ({ id })),
+                    }
+                    : undefined,
             },
             include: {
                 targets: true,
+                products: true,
             },
         });
         for (const target of post.targets) {

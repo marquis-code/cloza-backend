@@ -24,6 +24,8 @@ import { BullModule } from '@nestjs/bullmq';
         connection: {
           host: configService.get('REDIS_HOST'),
           port: configService.get('REDIS_PORT'),
+          username: configService.get('REDIS_USER'),
+          password: configService.get('REDIS_PASSWORD'),
         },
       }),
       inject: [ConfigService],
@@ -40,4 +42,4 @@ import { BullModule } from '@nestjs/bullmq';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

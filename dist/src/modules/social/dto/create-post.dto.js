@@ -41,6 +41,7 @@ class CreatePostDto {
     content;
     mediaUrls;
     targets;
+    productIds;
 }
 exports.CreatePostDto = CreatePostDto;
 __decorate([
@@ -79,4 +80,15 @@ __decorate([
     (0, class_transformer_1.Type)(() => PostTargetDto),
     __metadata("design:type", Array)
 ], CreatePostDto.prototype, "targets", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: ['product-id-123'],
+        description: 'List of product IDs to tag in the post',
+        required: false,
+    }),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], CreatePostDto.prototype, "productIds", void 0);
 //# sourceMappingURL=create-post.dto.js.map

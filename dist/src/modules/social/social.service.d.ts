@@ -8,11 +8,24 @@ export declare class SocialService {
     createPost(workspaceId: string, content: string, mediaUrls: string[], targets: {
         platform: Platform;
         scheduledFor: Date;
-    }[]): Promise<{
+    }[], productIds?: string[]): Promise<{
+        products: {
+            id: string;
+            name: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string | null;
+            price: import("@prisma/client-runtime-utils").Decimal;
+            currency: string;
+            imageUrl: string | null;
+            stock: number;
+            active: boolean;
+            workspaceId: string;
+        }[];
         targets: {
             id: string;
-            platform: import("@prisma/client").$Enums.Platform;
             status: import("@prisma/client").$Enums.PostStatus;
+            platform: import("@prisma/client").$Enums.Platform;
             scheduledFor: Date;
             publishedAt: Date | null;
             errorMessage: string | null;
@@ -24,14 +37,14 @@ export declare class SocialService {
         updatedAt: Date;
         workspaceId: string;
         content: string;
-        status: import("@prisma/client").$Enums.PostStatus;
         mediaUrls: string[];
+        status: import("@prisma/client").$Enums.PostStatus;
     }>;
     getPosts(workspaceId: string): Promise<({
         targets: {
             id: string;
-            platform: import("@prisma/client").$Enums.Platform;
             status: import("@prisma/client").$Enums.PostStatus;
+            platform: import("@prisma/client").$Enums.Platform;
             scheduledFor: Date;
             publishedAt: Date | null;
             errorMessage: string | null;
@@ -53,8 +66,8 @@ export declare class SocialService {
         updatedAt: Date;
         workspaceId: string;
         content: string;
-        status: import("@prisma/client").$Enums.PostStatus;
         mediaUrls: string[];
+        status: import("@prisma/client").$Enums.PostStatus;
     })[]>;
     linkAccount(workspaceId: string, data: any): Promise<{
         id: string;
@@ -74,8 +87,8 @@ export declare class SocialService {
             updatedAt: Date;
             workspaceId: string;
             content: string;
-            status: import("@prisma/client").$Enums.PostStatus;
             mediaUrls: string[];
+            status: import("@prisma/client").$Enums.PostStatus;
         };
     } & {
         comments: number;

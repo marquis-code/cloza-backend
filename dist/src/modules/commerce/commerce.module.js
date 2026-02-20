@@ -16,7 +16,7 @@ exports.CommerceModule = CommerceModule;
 exports.CommerceModule = CommerceModule = __decorate([
     (0, common_1.Module)({
         providers: [commerce_service_1.CommerceService],
-        controllers: [commerce_controller_1.CommerceController]
+        controllers: [commerce_controller_1.CommerceController],
     })
 ], CommerceModule);
 //# sourceMappingURL=commerce.module.js.map

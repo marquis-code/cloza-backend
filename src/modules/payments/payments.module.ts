@@ -8,4 +8,4 @@ import { PaystackWebhookController } from './webhooks/paystack.controller';
   controllers: [PaymentsController, PaystackWebhookController],
   exports: [PaymentsService],
 })
-export class PaymentsModule { }
+export class PaymentsModule {}

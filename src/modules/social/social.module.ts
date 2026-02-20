@@ -14,4 +14,4 @@ import { PostProcessor } from './processors/post.processor';
   controllers: [SocialController],
   exports: [SocialService],
 })
-export class SocialModule { }
+export class SocialModule {}

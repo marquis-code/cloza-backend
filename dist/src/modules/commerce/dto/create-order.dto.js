@@ -16,6 +16,7 @@ class CreateOrderDto {
     workspaceId;
     customerId;
     itemIds;
+    sourcePostId;
 }
 exports.CreateOrderDto = CreateOrderDto;
 __decorate([
@@ -42,4 +43,14 @@ __decorate([
     (0, class_validator_1.IsArray)(),
     __metadata("design:type", Array)
 ], CreateOrderDto.prototype, "itemIds", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'post-id-789',
+        description: 'The ID of the post that generated this sale',
+        required: false,
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateOrderDto.prototype, "sourcePostId", void 0);
 //# sourceMappingURL=create-order.dto.js.map

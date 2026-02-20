@@ -33,7 +33,7 @@ let PostProcessor = PostProcessor_1 = class PostProcessor extends bullmq_1.Worke
             if (!target)
                 return;
             this.logger.log(`Calling ${target.platform} API for post: ${target.post.content}`);
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise((resolve) => setTimeout(resolve, 2000));
             await this.prisma.postTarget.update({
                 where: { id: targetId },
                 data: {

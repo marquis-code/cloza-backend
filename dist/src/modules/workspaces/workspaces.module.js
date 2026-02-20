@@ -16,7 +16,7 @@ exports.WorkspacesModule = WorkspacesModule;
 exports.WorkspacesModule = WorkspacesModule = __decorate([
     (0, common_1.Module)({
         providers: [workspaces_service_1.WorkspacesService],
-        controllers: [workspaces_controller_1.WorkspacesController]
+        controllers: [workspaces_controller_1.WorkspacesController],
     })
 ], WorkspacesModule);
 //# sourceMappingURL=workspaces.module.js.map

@@ -33,7 +33,7 @@ let CommerceController = class CommerceController {
         return this.commerceService.getProducts(workspaceId);
     }
     async createOrder(createOrderDto) {
-        return this.commerceService.createOrder(createOrderDto.workspaceId, createOrderDto.customerId, createOrderDto.itemIds);
+        return this.commerceService.createOrder(createOrderDto.workspaceId, createOrderDto.customerId, createOrderDto.itemIds, createOrderDto.sourcePostId);
     }
     async getOrders(workspaceId) {
         return this.commerceService.getOrders(workspaceId);

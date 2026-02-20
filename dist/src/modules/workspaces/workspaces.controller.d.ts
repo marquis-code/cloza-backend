@@ -8,38 +8,38 @@ export declare class WorkspacesController {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            role: import("@prisma/client").$Enums.UserRole;
             workspaceId: string;
+            role: import("@prisma/client").$Enums.UserRole;
             userId: string;
         }[];
     } & {
-        name: string;
         id: string;
+        name: string;
+        plan: string;
         createdAt: Date;
         updatedAt: Date;
-        plan: string;
     }>;
     findAll(req: any): Promise<({
         members: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            role: import("@prisma/client").$Enums.UserRole;
             workspaceId: string;
+            role: import("@prisma/client").$Enums.UserRole;
             userId: string;
         }[];
     } & {
-        name: string;
         id: string;
+        name: string;
+        plan: string;
         createdAt: Date;
         updatedAt: Date;
-        plan: string;
     })[]>;
     findOne(id: string): Promise<({
         members: ({
             user: {
-                name: string | null;
                 id: string;
+                name: string | null;
                 email: string;
                 avatarUrl: string | null;
             };
@@ -47,15 +47,15 @@ export declare class WorkspacesController {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            role: import("@prisma/client").$Enums.UserRole;
             workspaceId: string;
+            role: import("@prisma/client").$Enums.UserRole;
             userId: string;
         })[];
     } & {
-        name: string;
         id: string;
+        name: string;
+        plan: string;
         createdAt: Date;
         updatedAt: Date;
-        plan: string;
     }) | null>;
 }

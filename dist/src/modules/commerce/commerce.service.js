@@ -51,7 +51,7 @@ let CommerceService = class CommerceService {
             },
         });
     }
-    async createOrder(workspaceId, customerId, itemIds) {
+    async createOrder(workspaceId, customerId, itemIds, sourcePostId) {
         const products = await this.prisma.product.findMany({
             where: { id: { in: itemIds }, workspaceId },
         });
@@ -60,6 +60,7 @@ let CommerceService = class CommerceService {
             data: {
                 workspaceId,
                 customerId,
+                sourcePostId,
                 totalAmount,
                 status: client_1.OrderStatus.PENDING,
                 items: {

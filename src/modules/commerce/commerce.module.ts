@@ -4,6 +4,6 @@ import { CommerceController } from './commerce.controller';
 
 @Module({
   providers: [CommerceService],
-  controllers: [CommerceController]
+  controllers: [CommerceController],
 })
 export class CommerceModule {}

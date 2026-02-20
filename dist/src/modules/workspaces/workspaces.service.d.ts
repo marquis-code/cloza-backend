@@ -8,38 +8,38 @@ export declare class WorkspacesService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            role: import("@prisma/client").$Enums.UserRole;
             workspaceId: string;
+            role: import("@prisma/client").$Enums.UserRole;
             userId: string;
         }[];
     } & {
-        name: string;
         id: string;
+        name: string;
+        plan: string;
         createdAt: Date;
         updatedAt: Date;
-        plan: string;
     }>;
     findAllForUser(userId: string): Promise<({
         members: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            role: import("@prisma/client").$Enums.UserRole;
             workspaceId: string;
+            role: import("@prisma/client").$Enums.UserRole;
             userId: string;
         }[];
     } & {
-        name: string;
         id: string;
+        name: string;
+        plan: string;
         createdAt: Date;
         updatedAt: Date;
-        plan: string;
     })[]>;
     findById(id: string): Promise<({
         members: ({
             user: {
-                name: string | null;
                 id: string;
+                name: string | null;
                 email: string;
                 avatarUrl: string | null;
             };
@@ -47,23 +47,23 @@ export declare class WorkspacesService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            role: import("@prisma/client").$Enums.UserRole;
             workspaceId: string;
+            role: import("@prisma/client").$Enums.UserRole;
             userId: string;
         })[];
     } & {
-        name: string;
         id: string;
+        name: string;
+        plan: string;
         createdAt: Date;
         updatedAt: Date;
-        plan: string;
     }) | null>;
     addMember(workspaceId: string, userId: string, role?: UserRole): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        role: import("@prisma/client").$Enums.UserRole;
         workspaceId: string;
+        role: import("@prisma/client").$Enums.UserRole;
         userId: string;
     }>;
 }
