@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber, IsArray, IsOptional } from 'class-validator';
+import { IsString, IsNumber, IsArray, IsOptional, IsEnum } from 'class-validator';
+import { ProductType } from '@prisma/client';
 
 export class CreateProductDto {
   @ApiProperty({
@@ -22,6 +23,15 @@ export class CreateProductDto {
   })
   @IsNumber()
   price: number;
+
+  @ApiProperty({
+    enum: ProductType,
+    example: ProductType.PHYSICAL,
+    description: 'The type of the product',
+  })
+  @IsEnum(ProductType)
+  @IsOptional()
+  type?: ProductType;
 
   @ApiProperty({
     example: 'workspace-id-123',

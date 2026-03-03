@@ -4,7 +4,7 @@ import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class WorkspacesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(name: string, userId: string) {
     return this.prisma.workspace.create({
@@ -50,11 +50,20 @@ export class WorkspacesService {
                 email: true,
                 name: true,
                 avatarUrl: true,
+                phoneNumber: true,
               },
             },
           },
         },
+        payoutAccounts: true,
       },
+    });
+  }
+
+  async update(id: string, data: any) {
+    return this.prisma.workspace.update({
+      where: { id },
+      data,
     });
   }
 

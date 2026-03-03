@@ -23,7 +23,7 @@ import { LinkAccountDto } from './dto/link-account.dto';
 @UseGuards(JwtAuthGuard)
 @Controller('social')
 export class SocialController {
-  constructor(private socialService: SocialService) {}
+  constructor(private socialService: SocialService) { }
 
   @Post('posts')
   @ApiOperation({ summary: 'Schedule a new post' })
@@ -48,17 +48,17 @@ export class SocialController {
     return this.socialService.getPosts(workspaceId);
   }
 
-  @Post('accounts')
-  @ApiOperation({ summary: 'Link a social account' })
-  @ApiResponse({
-    status: 201,
-    description: 'Social account linked successfully',
-  })
   async linkAccount(@Body() linkAccountDto: LinkAccountDto) {
     return this.socialService.linkAccount(
       linkAccountDto.workspaceId,
       linkAccountDto.data,
     );
+  }
+
+  @Get('accounts/:workspaceId')
+  @ApiOperation({ summary: 'Get linked social accounts for a workspace' })
+  async getAccounts(@Param('workspaceId') workspaceId: string) {
+    return this.socialService.getAccounts(workspaceId);
   }
 
   @Get('metrics/:workspaceId')
