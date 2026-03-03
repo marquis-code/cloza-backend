@@ -18,6 +18,7 @@ export declare class SocialService {
             price: import("@prisma/client-runtime-utils").Decimal;
             currency: string;
             imageUrl: string | null;
+            type: import("@prisma/client").$Enums.ProductType;
             stock: number;
             active: boolean;
             workspaceId: string;

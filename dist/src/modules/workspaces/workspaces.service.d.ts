@@ -16,6 +16,12 @@ export declare class WorkspacesService {
         id: string;
         name: string;
         plan: string;
+        businessCategory: string | null;
+        businessLocation: string | null;
+        defaultCurrency: string;
+        paymentConfirmationMessage: string | null;
+        followUpReminders: boolean;
+        newBuyerAlerts: boolean;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -32,6 +38,12 @@ export declare class WorkspacesService {
         id: string;
         name: string;
         plan: string;
+        businessCategory: string | null;
+        businessLocation: string | null;
+        defaultCurrency: string;
+        paymentConfirmationMessage: string | null;
+        followUpReminders: boolean;
+        newBuyerAlerts: boolean;
         createdAt: Date;
         updatedAt: Date;
     })[]>;
@@ -55,6 +67,12 @@ export declare class WorkspacesService {
         id: string;
         name: string;
         plan: string;
+        businessCategory: string | null;
+        businessLocation: string | null;
+        defaultCurrency: string;
+        paymentConfirmationMessage: string | null;
+        followUpReminders: boolean;
+        newBuyerAlerts: boolean;
         createdAt: Date;
         updatedAt: Date;
     }) | null>;

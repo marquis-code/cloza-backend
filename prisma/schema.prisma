@@ -38,12 +38,30 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum SenderType {
+  USER
+  CUSTOMER
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  PAYMENT_LINK
+}
+
+enum ProductType {
+  PHYSICAL
+  DIGITAL
+  SERVICE
+}
+
 model User {
   id            String            @id @default(uuid())
   email         String            @unique
   name          String?
   password      String
   avatarUrl     String?
+  phoneNumber   String?
   emailVerified Boolean           @default(false)
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
@@ -52,18 +70,26 @@ model User {
 }
 
 model Workspace {
-  id           String            @id @default(uuid())
-  name         String
-  plan         String            @default("FREE")
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
-  members      WorkspaceMember[]
-  accounts     SocialAccount[]
-  posts        Post[]
-  products     Product[]
-  customers    Customer[]
-  orders       Order[]
-  subscription Subscription?
+  id                         String            @id @default(uuid())
+  name                       String
+  plan                       String            @default("FREE")
+  businessCategory           String?
+  businessLocation           String?
+  defaultCurrency            String            @default("NGN")
+  paymentConfirmationMessage String?
+  followUpReminders          Boolean           @default(true)
+  newBuyerAlerts             Boolean           @default(false)
+  createdAt                  DateTime          @default(now())
+  updatedAt                  DateTime          @updatedAt
+  members                    WorkspaceMember[]
+  accounts                   SocialAccount[]
+  posts                      Post[]
+  products                   Product[]
+  customers                  Customer[]
+  orders                     Order[]
+  subscription               Subscription?
+  payoutAccounts             PayoutAccount[]
+  conversations              Conversation[]
 }
 
 model WorkspaceMember {
@@ -150,20 +176,60 @@ model Subscription {
   workspace Workspace @relation(fields: [workspaceId], references: [id])
 }
 
+model PayoutAccount {
+  id            String   @id @default(uuid())
+  workspaceId   String
+  bankName      String
+  accountNumber String
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+}
+
+model Conversation {
+  id            String   @id @default(uuid())
+  workspaceId   String
+  customerId    String
+  platform      Platform
+  lastMessageAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id])
+  customer  Customer  @relation(fields: [customerId], references: [id])
+  messages  Message[]
+}
+
+model Message {
+  id             String      @id @default(uuid())
+  conversationId String
+  senderId       String
+  senderType     SenderType
+  content        String
+  type           MessageType @default(TEXT)
+  payload        Json?
+  createdAt      DateTime    @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+}
+
 // Commerce Tables
 
 model Product {
-  id          String   @id @default(uuid())
+  id          String      @id @default(uuid())
   workspaceId String
   name        String
   description String?
-  price       Decimal  @db.Decimal(10, 2)
-  currency    String   @default("NGN")
+  price       Decimal     @db.Decimal(10, 2)
+  currency    String      @default("NGN")
   imageUrl    String?
-  stock       Int      @default(0)
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  type        ProductType @default(PHYSICAL)
+  stock       Int         @default(0)
+  active      Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   workspace  Workspace   @relation(fields: [workspaceId], references: [id])
   orderItems OrderItem[]
@@ -171,15 +237,16 @@ model Product {
 }
 
 model Customer {
-  id                 String    @id @default(uuid())
+  id                 String         @id @default(uuid())
   workspaceId        String
   name               String
   email              String?
   phone              String?
   platform           Platform?
   platformCustomerId String?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  conversations      Conversation[]
 
   workspace Workspace @relation(fields: [workspaceId], references: [id])
   orders    Order[]

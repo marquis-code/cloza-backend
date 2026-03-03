@@ -16,6 +16,7 @@ export declare class JwtStrategy extends JwtStrategy_base {
         email: string;
         password: string;
         avatarUrl: string | null;
+        phoneNumber: string | null;
         emailVerified: boolean;
         deletedAt: Date | null;
     }>;
