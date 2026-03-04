@@ -6,6 +6,7 @@ import {
   UseGuards,
   Request,
   Param,
+  Patch,
 } from '@nestjs/common';
 import { WorkspacesService } from './workspaces.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -16,13 +17,14 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
+import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 
 @ApiTags('Workspaces')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('workspaces')
 export class WorkspacesController {
-  constructor(private workspacesService: WorkspacesService) {}
+  constructor(private workspacesService: WorkspacesService) { }
 
   @Post()
   @ApiOperation({ summary: 'Create a new workspace' })
@@ -43,5 +45,15 @@ export class WorkspacesController {
   @ApiResponse({ status: 200, description: 'Workspace details' })
   async findOne(@Param('id') id: string) {
     return this.workspacesService.findById(id);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update workspace settings' })
+  @ApiResponse({ status: 200, description: 'Workspace updated successfully' })
+  async update(
+    @Param('id') id: string,
+    @Body() updateWorkspaceDto: UpdateWorkspaceDto,
+  ) {
+    return this.workspacesService.update(id, updateWorkspaceDto);
   }
 }

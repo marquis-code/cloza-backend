@@ -9,7 +9,7 @@ export class SocialService {
   constructor(
     private prisma: PrismaService,
     @InjectQueue('post-publishing') private postQueue: Queue,
-  ) {}
+  ) { }
 
   async createPost(
     workspaceId: string,
@@ -33,8 +33,8 @@ export class SocialService {
         },
         products: productIds?.length
           ? {
-              connect: productIds.map((id) => ({ id })),
-            }
+            connect: productIds.map((id) => ({ id })),
+          }
           : undefined,
       },
       include: {
@@ -70,6 +70,12 @@ export class SocialService {
         ...data,
         workspaceId,
       },
+    });
+  }
+
+  async getAccounts(workspaceId: string) {
+    return this.prisma.socialAccount.findMany({
+      where: { workspaceId },
     });
   }
 

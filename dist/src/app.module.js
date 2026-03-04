@@ -19,6 +19,7 @@ const commerce_module_1 = require("./modules/commerce/commerce.module");
 const social_module_1 = require("./modules/social/social.module");
 const payments_module_1 = require("./modules/payments/payments.module");
 const media_module_1 = require("./modules/media/media.module");
+const conversations_module_1 = require("./modules/conversations/conversations.module");
 const bullmq_1 = require("@nestjs/bullmq");
 let AppModule = class AppModule {
 };
@@ -49,6 +50,7 @@ exports.AppModule = AppModule = __decorate([
             social_module_1.SocialModule,
             payments_module_1.PaymentsModule,
             media_module_1.MediaModule,
+            conversations_module_1.ConversationsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

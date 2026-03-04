@@ -2,7 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { OrderStatus } from '@prisma/client';
+import { OrderStatus, MessageType, SenderType } from '@prisma/client';
+import { ConversationsService } from '../conversations/conversations.service';
 
 @Injectable()
 export class PaymentsService {
@@ -12,9 +13,10 @@ export class PaymentsService {
   constructor(
     private configService: ConfigService,
     private prisma: PrismaService,
-  ) {}
+    private conversationsService: ConversationsService,
+  ) { }
 
-  async createPaymentLink(orderId: string) {
+  async createPaymentLink(orderId: string, conversationId?: string) {
     const order = await this.prisma.order.findUnique({
       where: { id: orderId },
       include: { customer: true },
@@ -27,7 +29,7 @@ export class PaymentsService {
         `${this.paystackBaseUrl}/transaction/initialize`,
         {
           email: order.customer.email || 'customer@cloza.com',
-          amount: Number(order.totalAmount) * 100, // Paystack uses kobo/cents
+          amount: Math.round(Number(order.totalAmount) * 100), // Paystack uses kobo/cents
           reference: order.id,
           callback_url: `${this.configService.get('FRONTEND_URL')}/payment/callback`,
         },
@@ -46,11 +48,42 @@ export class PaymentsService {
         data: { paymentLink },
       });
 
+      // Integrate with Chat
+      if (conversationId) {
+        await this.conversationsService.sendMessage(
+          order.workspaceId, // System/User ID
+          SenderType.USER,
+          {
+            conversationId,
+            content: `Here's the payment link for your order: ${paymentLink}`,
+            type: MessageType.PAYMENT_LINK,
+            payload: { orderId, paymentLink },
+          },
+        );
+      }
+
       return { paymentLink };
     } catch (error) {
-      this.logger.error(`Paystack Initialization Error: ${error.message}`);
+      this.logger.error(`Paystack Initialization Error: ${error.response?.data?.message || error.message}`);
       throw error;
     }
+  }
+
+  // Payout Accounts
+  async addPayoutAccount(workspaceId: string, data: { bankName: string; accountNumber: string }) {
+    return this.prisma.payoutAccount.create({
+      data: {
+        ...data,
+        workspaceId,
+        isDefault: true, // Auto-set first one as default
+      },
+    });
+  }
+
+  async getPayoutAccounts(workspaceId: string) {
+    return this.prisma.payoutAccount.findMany({
+      where: { workspaceId },
+    });
   }
 
   async handleWebhook(body: any, signature: string) {

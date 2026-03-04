@@ -60,11 +60,19 @@ let WorkspacesService = class WorkspacesService {
                                 email: true,
                                 name: true,
                                 avatarUrl: true,
+                                phoneNumber: true,
                             },
                         },
                     },
                 },
+                payoutAccounts: true,
             },
+        });
+    }
+    async update(id, data) {
+        return this.prisma.workspace.update({
+            where: { id },
+            data,
         });
     }
     async addMember(workspaceId, userId, role = client_1.UserRole.MEMBER) {

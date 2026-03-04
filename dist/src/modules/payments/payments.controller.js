@@ -17,25 +17,52 @@ const common_1 = require("@nestjs/common");
 const payments_service_1 = require("./payments.service");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const swagger_1 = require("@nestjs/swagger");
+const initialize_payment_dto_1 = require("./dto/initialize-payment.dto");
+const payout_account_dto_1 = require("./dto/payout-account.dto");
 let PaymentsController = class PaymentsController {
     paymentsService;
     constructor(paymentsService) {
         this.paymentsService = paymentsService;
     }
-    async initialize(orderId) {
-        return this.paymentsService.createPaymentLink(orderId);
+    async initialize(dto) {
+        return this.paymentsService.createPaymentLink(dto.orderId, dto.conversationId);
+    }
+    async addPayoutAccount(dto) {
+        return this.paymentsService.addPayoutAccount(dto.workspaceId, {
+            bankName: dto.bankName,
+            accountNumber: dto.accountNumber,
+        });
+    }
+    async getPayoutAccounts(workspaceId) {
+        return this.paymentsService.getPayoutAccounts(workspaceId);
     }
 };
 exports.PaymentsController = PaymentsController;
 __decorate([
-    (0, common_1.Post)('initialize/:orderId'),
+    (0, common_1.Post)('initialize'),
     (0, swagger_1.ApiOperation)({ summary: 'Initialize a payment for an order' }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Payment link generated' }),
-    __param(0, (0, common_1.Param)('orderId')),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [initialize_payment_dto_1.InitializePaymentDto]),
+    __metadata("design:returntype", Promise)
+], PaymentsController.prototype, "initialize", null);
+__decorate([
+    (0, common_1.Post)('payout-accounts'),
+    (0, swagger_1.ApiOperation)({ summary: 'Add a payout account' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [payout_account_dto_1.CreatePayoutAccountDto]),
+    __metadata("design:returntype", Promise)
+], PaymentsController.prototype, "addPayoutAccount", null);
+__decorate([
+    (0, common_1.Get)('payout-accounts/:workspaceId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get payout accounts for a workspace' }),
+    __param(0, (0, common_1.Param)('workspaceId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], PaymentsController.prototype, "initialize", null);
+], PaymentsController.prototype, "getPayoutAccounts", null);
 exports.PaymentsController = PaymentsController = __decorate([
     (0, swagger_1.ApiTags)('Payments'),
     (0, swagger_1.ApiBearerAuth)(),

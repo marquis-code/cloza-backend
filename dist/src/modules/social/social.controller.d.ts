@@ -14,6 +14,7 @@ export declare class SocialController {
             price: import("@prisma/client-runtime-utils").Decimal;
             currency: string;
             imageUrl: string | null;
+            type: import("@prisma/client").$Enums.ProductType;
             stock: number;
             active: boolean;
             workspaceId: string;
@@ -76,6 +77,17 @@ export declare class SocialController {
         refreshToken: string | null;
         tokenExpiresAt: Date | null;
     }>;
+    getAccounts(workspaceId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        workspaceId: string;
+        platform: import("@prisma/client").$Enums.Platform;
+        platformAccountId: string;
+        accessToken: string;
+        refreshToken: string | null;
+        tokenExpiresAt: Date | null;
+    }[]>;
     getMetrics(workspaceId: string): Promise<({
         post: {
             id: string;

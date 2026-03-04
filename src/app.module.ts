@@ -10,6 +10,7 @@ import { CommerceModule } from './modules/commerce/commerce.module';
 import { SocialModule } from './modules/social/social.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { MediaModule } from './modules/media/media.module';
+import { ConversationsModule } from './modules/conversations/conversations.module';
 
 import { BullModule } from '@nestjs/bullmq';
 
@@ -38,8 +39,9 @@ import { BullModule } from '@nestjs/bullmq';
     SocialModule,
     PaymentsModule,
     MediaModule,
+    ConversationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
