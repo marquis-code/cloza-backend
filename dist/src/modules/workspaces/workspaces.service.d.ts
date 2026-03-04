@@ -54,6 +54,7 @@ export declare class WorkspacesService {
                 name: string | null;
                 email: string;
                 avatarUrl: string | null;
+                phoneNumber: string | null;
             };
         } & {
             id: string;
@@ -63,6 +64,15 @@ export declare class WorkspacesService {
             role: import("@prisma/client").$Enums.UserRole;
             userId: string;
         })[];
+        payoutAccounts: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            workspaceId: string;
+            bankName: string;
+            accountNumber: string;
+            isDefault: boolean;
+        }[];
     } & {
         id: string;
         name: string;
@@ -76,6 +86,19 @@ export declare class WorkspacesService {
         createdAt: Date;
         updatedAt: Date;
     }) | null>;
+    update(id: string, data: any): Promise<{
+        id: string;
+        name: string;
+        plan: string;
+        businessCategory: string | null;
+        businessLocation: string | null;
+        defaultCurrency: string;
+        paymentConfirmationMessage: string | null;
+        followUpReminders: boolean;
+        newBuyerAlerts: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
     addMember(workspaceId: string, userId: string, role?: UserRole): Promise<{
         id: string;
         createdAt: Date;

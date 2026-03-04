@@ -19,16 +19,19 @@ const config_1 = require("@nestjs/config");
 const axios_1 = __importDefault(require("axios"));
 const prisma_service_1 = require("../../common/prisma/prisma.service");
 const client_1 = require("@prisma/client");
+const conversations_service_1 = require("../conversations/conversations.service");
 let PaymentsService = PaymentsService_1 = class PaymentsService {
     configService;
     prisma;
+    conversationsService;
     logger = new common_1.Logger(PaymentsService_1.name);
     paystackBaseUrl = 'https://api.paystack.co';
-    constructor(configService, prisma) {
+    constructor(configService, prisma, conversationsService) {
         this.configService = configService;
         this.prisma = prisma;
+        this.conversationsService = conversationsService;
     }
-    async createPaymentLink(orderId) {
+    async createPaymentLink(orderId, conversationId) {
         const order = await this.prisma.order.findUnique({
             where: { id: orderId },
             include: { customer: true },
@@ -38,7 +41,7 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
         try {
             const response = await axios_1.default.post(`${this.paystackBaseUrl}/transaction/initialize`, {
                 email: order.customer.email || 'customer@cloza.com',
-                amount: Number(order.totalAmount) * 100,
+                amount: Math.round(Number(order.totalAmount) * 100),
                 reference: order.id,
                 callback_url: `${this.configService.get('FRONTEND_URL')}/payment/callback`,
             }, {
@@ -52,12 +55,34 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
                 where: { id: orderId },
                 data: { paymentLink },
             });
+            if (conversationId) {
+                await this.conversationsService.sendMessage(order.workspaceId, client_1.SenderType.USER, {
+                    conversationId,
+                    content: `Here's the payment link for your order: ${paymentLink}`,
+                    type: client_1.MessageType.PAYMENT_LINK,
+                    payload: { orderId, paymentLink },
+                });
+            }
             return { paymentLink };
         }
         catch (error) {
-            this.logger.error(`Paystack Initialization Error: ${error.message}`);
+            this.logger.error(`Paystack Initialization Error: ${error.response?.data?.message || error.message}`);
             throw error;
         }
+    }
+    async addPayoutAccount(workspaceId, data) {
+        return this.prisma.payoutAccount.create({
+            data: {
+                ...data,
+                workspaceId,
+                isDefault: true,
+            },
+        });
+    }
+    async getPayoutAccounts(workspaceId) {
+        return this.prisma.payoutAccount.findMany({
+            where: { workspaceId },
+        });
     }
     async handleWebhook(body, signature) {
         const event = body.event;
@@ -79,6 +104,7 @@ exports.PaymentsService = PaymentsService;
 exports.PaymentsService = PaymentsService = PaymentsService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [config_1.ConfigService,
-        prisma_service_1.PrismaService])
+        prisma_service_1.PrismaService,
+        conversations_service_1.ConversationsService])
 ], PaymentsService);
 //# sourceMappingURL=payments.service.js.map

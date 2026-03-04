@@ -36,6 +36,9 @@ let SocialController = class SocialController {
     async linkAccount(linkAccountDto) {
         return this.socialService.linkAccount(linkAccountDto.workspaceId, linkAccountDto.data);
     }
+    async getAccounts(workspaceId) {
+        return this.socialService.getAccounts(workspaceId);
+    }
     async getMetrics(workspaceId) {
         return this.socialService.getMetrics(workspaceId);
     }
@@ -60,17 +63,19 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SocialController.prototype, "getPosts", null);
 __decorate([
-    (0, common_1.Post)('accounts'),
-    (0, swagger_1.ApiOperation)({ summary: 'Link a social account' }),
-    (0, swagger_1.ApiResponse)({
-        status: 201,
-        description: 'Social account linked successfully',
-    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [link_account_dto_1.LinkAccountDto]),
     __metadata("design:returntype", Promise)
 ], SocialController.prototype, "linkAccount", null);
+__decorate([
+    (0, common_1.Get)('accounts/:workspaceId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get linked social accounts for a workspace' }),
+    __param(0, (0, common_1.Param)('workspaceId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], SocialController.prototype, "getAccounts", null);
 __decorate([
     (0, common_1.Get)('metrics/:workspaceId'),
     (0, swagger_1.ApiOperation)({ summary: 'Get engagement metrics for a workspace' }),

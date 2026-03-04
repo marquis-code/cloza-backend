@@ -71,6 +71,11 @@ let SocialService = class SocialService {
             },
         });
     }
+    async getAccounts(workspaceId) {
+        return this.prisma.socialAccount.findMany({
+            where: { workspaceId },
+        });
+    }
     async getMetrics(workspaceId) {
         return this.prisma.engagementMetric.findMany({
             where: { post: { workspaceId } },

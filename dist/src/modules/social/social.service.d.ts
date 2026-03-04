@@ -81,6 +81,17 @@ export declare class SocialService {
         refreshToken: string | null;
         tokenExpiresAt: Date | null;
     }>;
+    getAccounts(workspaceId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        workspaceId: string;
+        platform: import("@prisma/client").$Enums.Platform;
+        platformAccountId: string;
+        accessToken: string;
+        refreshToken: string | null;
+        tokenExpiresAt: Date | null;
+    }[]>;
     getMetrics(workspaceId: string): Promise<({
         post: {
             id: string;

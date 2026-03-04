@@ -11,11 +11,13 @@ const common_1 = require("@nestjs/common");
 const payments_service_1 = require("./payments.service");
 const payments_controller_1 = require("./payments.controller");
 const paystack_controller_1 = require("./webhooks/paystack.controller");
+const conversations_module_1 = require("../conversations/conversations.module");
 let PaymentsModule = class PaymentsModule {
 };
 exports.PaymentsModule = PaymentsModule;
 exports.PaymentsModule = PaymentsModule = __decorate([
     (0, common_1.Module)({
+        imports: [conversations_module_1.ConversationsModule],
         providers: [payments_service_1.PaymentsService],
         controllers: [payments_controller_1.PaymentsController, paystack_controller_1.PaystackWebhookController],
         exports: [payments_service_1.PaymentsService],

@@ -12,10 +12,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateProductDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const client_1 = require("@prisma/client");
 class CreateProductDto {
     name;
     description;
     price;
+    type;
     workspaceId;
     mediaUrls;
 }
@@ -44,6 +46,16 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], CreateProductDto.prototype, "price", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        enum: client_1.ProductType,
+        example: client_1.ProductType.PHYSICAL,
+        description: 'The type of the product',
+    }),
+    (0, class_validator_1.IsEnum)(client_1.ProductType),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateProductDto.prototype, "type", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         example: 'workspace-id-123',

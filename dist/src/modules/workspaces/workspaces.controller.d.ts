@@ -1,5 +1,6 @@
 import { WorkspacesService } from './workspaces.service';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
+import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 export declare class WorkspacesController {
     private workspacesService;
     constructor(workspacesService: WorkspacesService);
@@ -54,6 +55,7 @@ export declare class WorkspacesController {
                 name: string | null;
                 email: string;
                 avatarUrl: string | null;
+                phoneNumber: string | null;
             };
         } & {
             id: string;
@@ -63,6 +65,15 @@ export declare class WorkspacesController {
             role: import("@prisma/client").$Enums.UserRole;
             userId: string;
         })[];
+        payoutAccounts: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            workspaceId: string;
+            bankName: string;
+            accountNumber: string;
+            isDefault: boolean;
+        }[];
     } & {
         id: string;
         name: string;
@@ -76,4 +87,17 @@ export declare class WorkspacesController {
         createdAt: Date;
         updatedAt: Date;
     }) | null>;
+    update(id: string, updateWorkspaceDto: UpdateWorkspaceDto): Promise<{
+        id: string;
+        name: string;
+        plan: string;
+        businessCategory: string | null;
+        businessLocation: string | null;
+        defaultCurrency: string;
+        paymentConfirmationMessage: string | null;
+        followUpReminders: boolean;
+        newBuyerAlerts: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
 }
