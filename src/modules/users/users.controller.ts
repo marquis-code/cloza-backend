@@ -36,4 +36,11 @@ export class UsersController {
     async updateProfile(@Request() req, @Body() updateUserDto: UpdateUserDto) {
         return this.usersService.update(req.user.id, updateUserDto);
     }
+
+    @Patch('onboard')
+    @ApiOperation({ summary: 'Mark user as onboarded' })
+    @ApiResponse({ status: 200, description: 'User marked as onboarded successfully' })
+    async markAsOnboarded(@Request() req) {
+        return this.usersService.update(req.user.id, { isOnboarded: true });
+    }
 }
