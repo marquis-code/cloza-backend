@@ -63,6 +63,7 @@ model User {
   avatarUrl     String?
   phoneNumber   String?
   emailVerified Boolean           @default(false)
+  isOnboarded   Boolean           @default(false)
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
   deletedAt     DateTime?
