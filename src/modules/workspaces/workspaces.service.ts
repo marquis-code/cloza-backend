@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { UserRole } from '@prisma/client';
+import { MailerService } from '../mailer/mailer.service';
 
 @Injectable()
 export class WorkspacesService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private mailerService: MailerService,
+  ) { }
 
   async create(name: string, userId: string) {
     return this.prisma.workspace.create({
@@ -72,12 +76,26 @@ export class WorkspacesService {
     userId: string,
     role: UserRole = UserRole.MEMBER,
   ) {
-    return this.prisma.workspaceMember.create({
+    const member = await this.prisma.workspaceMember.create({
       data: {
         workspaceId,
         userId,
         role,
       },
+      include: {
+        user: true,
+        workspace: true,
+      }
     });
+
+    // Send invitation/welcome to workspace email
+    await this.mailerService.sendWorkspaceInvitation(
+      member.user.email,
+      'A Team Member', // Ideally we'd pass the inviter's name
+      member.workspace.name,
+      `https://app.cloza.io/workspaces/${workspaceId}`
+    );
+
+    return member;
   }
 }

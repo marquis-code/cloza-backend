@@ -64,6 +64,10 @@ model User {
   phoneNumber   String?
   emailVerified Boolean           @default(false)
   isOnboarded   Boolean           @default(false)
+  verificationCode          String?
+  verificationCodeExpiresAt DateTime?
+  passwordResetToken        String?
+  passwordResetTokenExpiresAt DateTime?
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
   deletedAt     DateTime?

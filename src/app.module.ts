@@ -11,6 +11,7 @@ import { SocialModule } from './modules/social/social.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { MediaModule } from './modules/media/media.module';
 import { ConversationsModule } from './modules/conversations/conversations.module';
+import { MailerModule } from './modules/mailer/mailer.module';
 
 import { BullModule } from '@nestjs/bullmq';
 
@@ -40,6 +41,7 @@ import { BullModule } from '@nestjs/bullmq';
     PaymentsModule,
     MediaModule,
     ConversationsModule,
+    MailerModule,
   ],
   controllers: [AppController],
   providers: [AppService],
