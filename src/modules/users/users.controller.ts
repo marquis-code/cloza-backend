@@ -16,12 +16,17 @@ import {
 } from '@nestjs/swagger';
 import { UpdateUserDto } from './dto/update-user.dto';
 
+import { MailerService } from '../mailer/mailer.service';
+
 @ApiTags('Users')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
-    constructor(private usersService: UsersService) { }
+    constructor(
+        private usersService: UsersService,
+        private mailerService: MailerService,
+    ) { }
 
     @Get('profile')
     @ApiOperation({ summary: 'Get current user profile' })
@@ -41,6 +46,8 @@ export class UsersController {
     @ApiOperation({ summary: 'Mark user as onboarded' })
     @ApiResponse({ status: 200, description: 'User marked as onboarded successfully' })
     async markAsOnboarded(@Request() req) {
-        return this.usersService.update(req.user.id, { isOnboarded: true });
+        const user = await this.usersService.update(req.user.id, { isOnboarded: true });
+        await this.mailerService.sendWelcomeEmail(user.email, user.name || 'there');
+        return user;
     }
 }

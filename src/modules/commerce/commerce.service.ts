@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { OrderStatus, Prisma } from '@prisma/client';
+import { MailerService } from '../mailer/mailer.service';
 
 @Injectable()
 export class CommerceService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private mailerService: MailerService,
+  ) {}
 
   // Products
   async createProduct(
@@ -64,7 +68,7 @@ export class CommerceService {
 
     const totalAmount = products.reduce((acc, p) => acc + Number(p.price), 0);
 
-    return this.prisma.order.create({
+    const order = await this.prisma.order.create({
       data: {
         workspaceId,
         customerId,
@@ -80,10 +84,46 @@ export class CommerceService {
         },
       },
       include: {
-        items: true,
+        items: {
+          include: {
+            product: true,
+          }
+        },
         customer: true,
+        workspace: {
+          include: {
+            members: {
+              where: { role: 'OWNER' },
+              include: { user: true }
+            }
+          }
+        }
       },
     });
+
+    // Send customer confirmation
+    if (order.customer.email) {
+      await this.mailerService.sendOrderConfirmation(
+        order.customer.email,
+        order.customer.name,
+        order.id,
+        `${order.totalAmount} ${order.currency}`,
+        order.items.map(i => ({ name: i.product.name, quantity: i.quantity, price: `${i.price} ${order.currency}` }))
+      );
+    }
+
+    // Send merchant alert
+    const owners = order.workspace.members;
+    for (const owner of owners) {
+      await this.mailerService.sendNewBuyerAlert(
+        owner.user.email,
+        owner.user.name || 'Merchant',
+        `${order.totalAmount} ${order.currency}`,
+        'Cloza Checkout'
+      );
+    }
+
+    return order;
   }
 
   async updateOrderStatus(orderId: string, status: OrderStatus) {

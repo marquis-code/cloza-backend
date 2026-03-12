@@ -19,6 +19,12 @@ export class UsersService {
     });
   }
 
+  async findByResetToken(token: string): Promise<User | null> {
+    return this.prisma.user.findFirst({
+      where: { passwordResetToken: token },
+    });
+  }
+
   async create(data: Prisma.UserCreateInput): Promise<User> {
     const hashedPassword = await bcrypt.hash(data.password, 10);
     return this.prisma.user.create({
