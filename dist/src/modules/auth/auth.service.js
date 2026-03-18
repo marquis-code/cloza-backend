@@ -46,16 +46,25 @@ exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const users_service_1 = require("../users/users.service");
+const mailer_service_1 = require("../mailer/mailer.service");
 const bcrypt = __importStar(require("bcrypt"));
+const crypto_1 = require("crypto");
+const firebase_service_1 = require("../../common/firebase/firebase.service");
 let AuthService = class AuthService {
     usersService;
     jwtService;
-    constructor(usersService, jwtService) {
+    mailerService;
+    firebaseService;
+    constructor(usersService, jwtService, mailerService, firebaseService) {
         this.usersService = usersService;
         this.jwtService = jwtService;
+        this.mailerService = mailerService;
+        this.firebaseService = firebaseService;
     }
     async validateUser(email, pass) {
         const user = await this.usersService.findByEmail(email);
+        if (!user)
+            return null;
         if (user && (await bcrypt.compare(pass, user.password))) {
             const { password, ...result } = user;
             return result;
@@ -63,6 +72,37 @@ let AuthService = class AuthService {
         return null;
     }
     async login(user) {
+        if (!user.emailVerified) {
+            throw new common_1.UnauthorizedException('Email not verified. Please verify your email first.');
+        }
+        const verificationCode = (0, crypto_1.randomInt)(100000, 999999).toString();
+        const verificationCodeExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
+        await this.usersService.update(user.id, {
+            verificationCode,
+            verificationCodeExpiresAt,
+        });
+        await this.mailerService.sendLoginCodeEmail(user.email, verificationCode);
+        return {
+            message: 'Login verification code sent to your email.',
+            requiresVerification: true,
+            email: user.email,
+        };
+    }
+    async verifyLogin(email, code) {
+        const user = await this.usersService.findByEmail(email);
+        if (!user) {
+            throw new common_1.BadRequestException('User not found');
+        }
+        if (user.verificationCode !== code) {
+            throw new common_1.BadRequestException('Invalid verification code');
+        }
+        if (!user.verificationCodeExpiresAt || user.verificationCodeExpiresAt < new Date()) {
+            throw new common_1.BadRequestException('Verification code expired');
+        }
+        await this.usersService.update(user.id, {
+            verificationCode: null,
+            verificationCodeExpiresAt: null,
+        });
         const payload = { email: user.email, sub: user.id };
         return {
             access_token: this.jwtService.sign(payload),
@@ -71,22 +111,129 @@ let AuthService = class AuthService {
                 email: user.email,
                 name: user.name,
                 avatarUrl: user.avatarUrl,
+                isOnboarded: user.isOnboarded,
             },
         };
     }
     async register(data) {
         const existingUser = await this.usersService.findByEmail(data.email);
         if (existingUser) {
-            throw new common_1.UnauthorizedException('User already exists');
+            throw new common_1.BadRequestException('User already exists');
         }
-        const user = await this.usersService.create(data);
+        const verificationCode = (0, crypto_1.randomInt)(100000, 999999).toString();
+        const verificationCodeExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+        const user = await this.usersService.create({
+            ...data,
+            verificationCode,
+            verificationCodeExpiresAt,
+        });
+        try {
+            await this.mailerService.sendVerificationEmail(user.email, verificationCode);
+        }
+        catch (error) {
+            console.error('Failed to send verification email:', error);
+            return {
+                message: 'Registration successful, but we couldn\'t send the verification email. Please try requesting a new code.',
+                email: user.email,
+                error: 'EMAIL_SEND_FAILED',
+            };
+        }
+        return {
+            message: 'Registration successful. Please check your email for verification code.',
+            email: user.email,
+        };
+    }
+    async googleLogin(idToken) {
+        try {
+            const decodedToken = await this.firebaseService.verifyIdToken(idToken);
+            const email = decodedToken.email;
+            const name = decodedToken.name;
+            const picture = decodedToken.picture;
+            if (!email) {
+                throw new common_1.BadRequestException('Email not provided in Google token');
+            }
+            let user = await this.usersService.findByEmail(email);
+            if (!user) {
+                user = await this.usersService.create({
+                    email,
+                    name: name || email.split('@')[0],
+                    avatarUrl: picture,
+                    emailVerified: true,
+                    isOnboarded: false,
+                    password: (0, crypto_1.randomBytes)(16).toString('hex'),
+                });
+            }
+            else if (!user.emailVerified) {
+                await this.usersService.update(user.id, { emailVerified: true });
+            }
+            const payload = { email: user.email, sub: user.id };
+            return {
+                access_token: this.jwtService.sign(payload),
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    avatarUrl: user.avatarUrl,
+                    isOnboarded: user.isOnboarded,
+                },
+            };
+        }
+        catch (error) {
+            console.error('Google login failed:', error);
+            throw new common_1.UnauthorizedException('Invalid Google token');
+        }
+    }
+    async verifyEmail(email, code) {
+        const user = await this.usersService.findByEmail(email);
+        if (!user) {
+            throw new common_1.BadRequestException('User not found');
+        }
+        if (user.verificationCode !== code) {
+            throw new common_1.BadRequestException('Invalid verification code');
+        }
+        if (!user.verificationCodeExpiresAt || user.verificationCodeExpiresAt < new Date()) {
+            throw new common_1.BadRequestException('Verification code expired');
+        }
+        await this.usersService.update(user.id, {
+            emailVerified: true,
+            verificationCode: null,
+            verificationCodeExpiresAt: null,
+        });
         return this.login(user);
+    }
+    async forgotPassword(email) {
+        const user = await this.usersService.findByEmail(email);
+        if (!user) {
+            return { message: 'If an account exists, an email has been sent.' };
+        }
+        const token = (0, crypto_1.randomBytes)(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+        await this.usersService.update(user.id, {
+            passwordResetToken: token,
+            passwordResetTokenExpiresAt: expiresAt,
+        });
+        await this.mailerService.sendPasswordResetEmail(email, token);
+        return { message: 'Password reset email sent.' };
+    }
+    async resetPassword(token, newPassword) {
+        const user = await this.usersService.findByResetToken(token);
+        if (!user || !user.passwordResetTokenExpiresAt || user.passwordResetTokenExpiresAt < new Date()) {
+            throw new common_1.BadRequestException('Invalid or expired reset token');
+        }
+        await this.usersService.update(user.id, {
+            password: newPassword,
+            passwordResetToken: null,
+            passwordResetTokenExpiresAt: null,
+        });
+        return { message: 'Password reset successful.' };
     }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [users_service_1.UsersService,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        mailer_service_1.MailerService,
+        firebase_service_1.FirebaseService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

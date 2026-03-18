@@ -13,10 +13,13 @@ exports.WorkspacesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../common/prisma/prisma.service");
 const client_1 = require("@prisma/client");
+const mailer_service_1 = require("../mailer/mailer.service");
 let WorkspacesService = class WorkspacesService {
     prisma;
-    constructor(prisma) {
+    mailerService;
+    constructor(prisma, mailerService) {
         this.prisma = prisma;
+        this.mailerService = mailerService;
     }
     async create(name, userId) {
         return this.prisma.workspace.create({
@@ -76,18 +79,25 @@ let WorkspacesService = class WorkspacesService {
         });
     }
     async addMember(workspaceId, userId, role = client_1.UserRole.MEMBER) {
-        return this.prisma.workspaceMember.create({
+        const member = await this.prisma.workspaceMember.create({
             data: {
                 workspaceId,
                 userId,
                 role,
             },
+            include: {
+                user: true,
+                workspace: true,
+            }
         });
+        await this.mailerService.sendWorkspaceInvitation(member.user.email, 'A Team Member', member.workspace.name, `https://app.cloza.io/workspaces/${workspaceId}`);
+        return member;
     }
 };
 exports.WorkspacesService = WorkspacesService;
 exports.WorkspacesService = WorkspacesService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        mailer_service_1.MailerService])
 ], WorkspacesService);
 //# sourceMappingURL=workspaces.service.js.map

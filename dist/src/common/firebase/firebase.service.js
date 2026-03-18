@@ -42,52 +42,45 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UsersService = void 0;
+exports.FirebaseService = void 0;
 const common_1 = require("@nestjs/common");
-const prisma_service_1 = require("../../common/prisma/prisma.service");
-const bcrypt = __importStar(require("bcrypt"));
-let UsersService = class UsersService {
-    prisma;
-    constructor(prisma) {
-        this.prisma = prisma;
+const config_1 = require("@nestjs/config");
+const admin = __importStar(require("firebase-admin"));
+let FirebaseService = class FirebaseService {
+    configService;
+    firebaseApp;
+    constructor(configService) {
+        this.configService = configService;
     }
-    async findByEmail(email) {
-        return this.prisma.user.findUnique({
-            where: { email },
-        });
-    }
-    async findById(id) {
-        return this.prisma.user.findUnique({
-            where: { id },
-        });
-    }
-    async findByResetToken(token) {
-        return this.prisma.user.findFirst({
-            where: { passwordResetToken: token },
-        });
-    }
-    async create(data) {
-        const hashedPassword = await bcrypt.hash(data.password, 10);
-        return this.prisma.user.create({
-            data: {
-                ...data,
-                password: hashedPassword,
-            },
-        });
-    }
-    async update(id, data) {
-        if (data.password && typeof data.password === 'string') {
-            data.password = await bcrypt.hash(data.password, 10);
+    onModuleInit() {
+        const projectId = this.configService.get('FIREBASE_PROJECT_ID');
+        const clientEmail = this.configService.get('FIREBASE_CLIENT_EMAIL');
+        const privateKey = this.configService.get('FIREBASE_PRIVATE_KEY')?.replace(/\\n/g, '\n');
+        if (!admin.apps.length) {
+            this.firebaseApp = admin.initializeApp({
+                credential: admin.credential.cert({
+                    projectId,
+                    clientEmail,
+                    privateKey,
+                }),
+            });
         }
-        return this.prisma.user.update({
-            where: { id },
-            data,
-        });
+        else {
+            this.firebaseApp = admin.app();
+        }
+    }
+    async verifyIdToken(idToken) {
+        try {
+            return await this.firebaseApp.auth().verifyIdToken(idToken);
+        }
+        catch (error) {
+            throw error;
+        }
     }
 };
-exports.UsersService = UsersService;
-exports.UsersService = UsersService = __decorate([
+exports.FirebaseService = FirebaseService;
+exports.FirebaseService = FirebaseService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
-], UsersService);
-//# sourceMappingURL=users.service.js.map
+    __metadata("design:paramtypes", [config_1.ConfigService])
+], FirebaseService);
+//# sourceMappingURL=firebase.service.js.map

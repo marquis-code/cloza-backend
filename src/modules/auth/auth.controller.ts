@@ -43,6 +43,14 @@ export class AuthController {
     return this.authService.login(user);
   }
 
+  @Post('google')
+  @ApiOperation({ summary: 'Login with Google' })
+  @ApiResponse({ status: 200, description: 'Token generated' })
+  @ApiResponse({ status: 401, description: 'Invalid Google token' })
+  async googleLogin(@Body('idToken') idToken: string) {
+    return this.authService.googleLogin(idToken);
+  }
+
   @Post('verify-email')
   @ApiOperation({ summary: 'Verify user email (Signup)' })
   async verifyEmail(@Body() body: { email: string; code: string }) {

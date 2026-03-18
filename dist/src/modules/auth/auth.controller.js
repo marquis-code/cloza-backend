@@ -29,9 +29,24 @@ let AuthController = class AuthController {
     async login(loginDto) {
         const user = await this.authService.validateUser(loginDto.email, loginDto.password);
         if (!user) {
-            return { message: 'Invalid credentials' };
+            throw new common_1.UnauthorizedException('Invalid credentials');
         }
         return this.authService.login(user);
+    }
+    async googleLogin(idToken) {
+        return this.authService.googleLogin(idToken);
+    }
+    async verifyEmail(body) {
+        return this.authService.verifyEmail(body.email, body.code);
+    }
+    async verifyLogin(body) {
+        return this.authService.verifyLogin(body.email, body.code);
+    }
+    async forgotPassword(body) {
+        return this.authService.forgotPassword(body.email);
+    }
+    async resetPassword(body) {
+        return this.authService.resetPassword(body.token, body.newPassword);
     }
 };
 exports.AuthController = AuthController;
@@ -52,12 +67,54 @@ __decorate([
     (0, common_1.Post)('login'),
     (0, swagger_1.ApiOperation)({ summary: 'Login user' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Token generated' }),
-    (0, swagger_1.ApiResponse)({ status: 401, description: 'Invalid credentials' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Invalid credentials or email not verified' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [login_dto_1.LoginDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
+__decorate([
+    (0, common_1.Post)('google'),
+    (0, swagger_1.ApiOperation)({ summary: 'Login with Google' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Token generated' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Invalid Google token' }),
+    __param(0, (0, common_1.Body)('idToken')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "googleLogin", null);
+__decorate([
+    (0, common_1.Post)('verify-email'),
+    (0, swagger_1.ApiOperation)({ summary: 'Verify user email (Signup)' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "verifyEmail", null);
+__decorate([
+    (0, common_1.Post)('verify-login'),
+    (0, swagger_1.ApiOperation)({ summary: 'Verify login code (2FA)' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "verifyLogin", null);
+__decorate([
+    (0, common_1.Post)('forgot-password'),
+    (0, swagger_1.ApiOperation)({ summary: 'Request password reset' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "forgotPassword", null);
+__decorate([
+    (0, common_1.Post)('reset-password'),
+    (0, swagger_1.ApiOperation)({ summary: 'Reset password' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "resetPassword", null);
 exports.AuthController = AuthController = __decorate([
     (0, swagger_1.ApiTags)('Auth'),
     (0, common_1.Controller)('auth'),

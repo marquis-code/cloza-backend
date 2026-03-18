@@ -6,19 +6,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.WorkspacesModule = void 0;
+exports.MailerModule = void 0;
 const common_1 = require("@nestjs/common");
-const workspaces_service_1 = require("./workspaces.service");
-const workspaces_controller_1 = require("./workspaces.controller");
-const mailer_module_1 = require("../mailer/mailer.module");
-let WorkspacesModule = class WorkspacesModule {
+const mailer_service_1 = require("./mailer.service");
+let MailerModule = class MailerModule {
 };
-exports.WorkspacesModule = WorkspacesModule;
-exports.WorkspacesModule = WorkspacesModule = __decorate([
+exports.MailerModule = MailerModule;
+exports.MailerModule = MailerModule = __decorate([
+    (0, common_1.Global)(),
     (0, common_1.Module)({
-        imports: [mailer_module_1.MailerModule],
-        providers: [workspaces_service_1.WorkspacesService],
-        controllers: [workspaces_controller_1.WorkspacesController],
+        providers: [mailer_service_1.MailerService],
+        exports: [mailer_service_1.MailerService],
     })
-], WorkspacesModule);
-//# sourceMappingURL=workspaces.module.js.map
+], MailerModule);
+//# sourceMappingURL=mailer.module.js.map

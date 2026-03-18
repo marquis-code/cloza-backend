@@ -1,8 +1,10 @@
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { OrderStatus, Prisma } from '@prisma/client';
+import { MailerService } from '../mailer/mailer.service';
 export declare class CommerceService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private mailerService;
+    constructor(prisma: PrismaService, mailerService: MailerService);
     createProduct(workspaceId: string, data: Prisma.ProductCreateWithoutWorkspaceInput): Promise<{
         id: string;
         name: string;
@@ -43,6 +45,46 @@ export declare class CommerceService {
         platformCustomerId: string | null;
     }>;
     createOrder(workspaceId: string, customerId: string, itemIds: string[], sourcePostId?: string): Promise<{
+        workspace: {
+            members: ({
+                user: {
+                    id: string;
+                    name: string | null;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    email: string;
+                    password: string;
+                    avatarUrl: string | null;
+                    phoneNumber: string | null;
+                    emailVerified: boolean;
+                    isOnboarded: boolean;
+                    verificationCode: string | null;
+                    verificationCodeExpiresAt: Date | null;
+                    passwordResetToken: string | null;
+                    passwordResetTokenExpiresAt: Date | null;
+                    deletedAt: Date | null;
+                };
+            } & {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                workspaceId: string;
+                role: import("@prisma/client").$Enums.UserRole;
+                userId: string;
+            })[];
+        } & {
+            id: string;
+            name: string;
+            plan: string;
+            businessCategory: string | null;
+            businessLocation: string | null;
+            defaultCurrency: string;
+            paymentConfirmationMessage: string | null;
+            followUpReminders: boolean;
+            newBuyerAlerts: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+        };
         customer: {
             id: string;
             name: string;
@@ -54,13 +96,28 @@ export declare class CommerceService {
             platform: import("@prisma/client").$Enums.Platform | null;
             platformCustomerId: string | null;
         };
-        items: {
+        items: ({
+            product: {
+                id: string;
+                name: string;
+                createdAt: Date;
+                updatedAt: Date;
+                description: string | null;
+                price: Prisma.Decimal;
+                currency: string;
+                imageUrl: string | null;
+                type: import("@prisma/client").$Enums.ProductType;
+                stock: number;
+                active: boolean;
+                workspaceId: string;
+            };
+        } & {
             id: string;
             price: Prisma.Decimal;
             quantity: number;
             productId: string;
             orderId: string;
-        }[];
+        })[];
     } & {
         id: string;
         createdAt: Date;
