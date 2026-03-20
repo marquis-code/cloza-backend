@@ -5,6 +5,7 @@ import { MailerService } from '../mailer/mailer.service';
 import * as bcrypt from 'bcrypt';
 import { randomBytes, randomInt } from 'crypto';
 import { FirebaseService } from '../../common/firebase/firebase.service';
+import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +14,7 @@ export class AuthService {
     private jwtService: JwtService,
     private mailerService: MailerService,
     private firebaseService: FirebaseService,
+    private auditService: AuditService,
   ) { }
 
   async validateUser(email: string, pass: string): Promise<any> {
@@ -92,10 +94,32 @@ export class AuthService {
     const verificationCode = randomInt(100000, 999999).toString();
     const verificationCodeExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
 
+    // Map selected plan to trial plan
+    let trialPlan = 'pro'; // Default to Pro for Free or Pro selections
+    if (data.plan && (data.plan.toLowerCase() === 'business')) {
+      trialPlan = 'business';
+    }
+
+    const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 14 days
+
     const user = await this.usersService.create({
       ...data,
       verificationCode,
       verificationCodeExpiresAt,
+      trialPlan,
+      trialEndsAt,
+    });
+
+    await this.auditService.logAction({
+      action: 'USER_REGISTERED',
+      entityType: 'USER',
+      userId: user.id,
+      entityId: user.id,
+      details: {
+        method: 'email',
+        requestedPlan: data.plan || 'none',
+        assignedTrialPlan: trialPlan,
+      },
     });
 
     try {
@@ -131,6 +155,9 @@ export class AuthService {
 
       if (!user) {
         // Create user if they don't exist
+        const trialPlan = 'pro';
+        const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 14 days
+        
         user = await this.usersService.create({
           email,
           name: name || email.split('@')[0],
@@ -138,6 +165,19 @@ export class AuthService {
           emailVerified: true,
           isOnboarded: false,
           password: randomBytes(16).toString('hex'), // Random password for social users
+          trialPlan,
+          trialEndsAt,
+        });
+
+        await this.auditService.logAction({
+          action: 'USER_REGISTERED',
+          entityType: 'USER',
+          userId: user.id,
+          entityId: user.id,
+          details: {
+            method: 'google',
+            assignedTrialPlan: trialPlan,
+          },
         });
       } else if (!user.emailVerified) {
         // Automatically verify email if they login via Google

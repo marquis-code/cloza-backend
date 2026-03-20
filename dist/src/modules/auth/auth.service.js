@@ -50,16 +50,19 @@ const mailer_service_1 = require("../mailer/mailer.service");
 const bcrypt = __importStar(require("bcrypt"));
 const crypto_1 = require("crypto");
 const firebase_service_1 = require("../../common/firebase/firebase.service");
+const audit_service_1 = require("../audit/audit.service");
 let AuthService = class AuthService {
     usersService;
     jwtService;
     mailerService;
     firebaseService;
-    constructor(usersService, jwtService, mailerService, firebaseService) {
+    auditService;
+    constructor(usersService, jwtService, mailerService, firebaseService, auditService) {
         this.usersService = usersService;
         this.jwtService = jwtService;
         this.mailerService = mailerService;
         this.firebaseService = firebaseService;
+        this.auditService = auditService;
     }
     async validateUser(email, pass) {
         const user = await this.usersService.findByEmail(email);
@@ -122,10 +125,28 @@ let AuthService = class AuthService {
         }
         const verificationCode = (0, crypto_1.randomInt)(100000, 999999).toString();
         const verificationCodeExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+        let trialPlan = 'pro';
+        if (data.plan && (data.plan.toLowerCase() === 'business')) {
+            trialPlan = 'business';
+        }
+        const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
         const user = await this.usersService.create({
             ...data,
             verificationCode,
             verificationCodeExpiresAt,
+            trialPlan,
+            trialEndsAt,
+        });
+        await this.auditService.logAction({
+            action: 'USER_REGISTERED',
+            entityType: 'USER',
+            userId: user.id,
+            entityId: user.id,
+            details: {
+                method: 'email',
+                requestedPlan: data.plan || 'none',
+                assignedTrialPlan: trialPlan,
+            },
         });
         try {
             await this.mailerService.sendVerificationEmail(user.email, verificationCode);
@@ -154,6 +175,8 @@ let AuthService = class AuthService {
             }
             let user = await this.usersService.findByEmail(email);
             if (!user) {
+                const trialPlan = 'pro';
+                const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
                 user = await this.usersService.create({
                     email,
                     name: name || email.split('@')[0],
@@ -161,6 +184,18 @@ let AuthService = class AuthService {
                     emailVerified: true,
                     isOnboarded: false,
                     password: (0, crypto_1.randomBytes)(16).toString('hex'),
+                    trialPlan,
+                    trialEndsAt,
+                });
+                await this.auditService.logAction({
+                    action: 'USER_REGISTERED',
+                    entityType: 'USER',
+                    userId: user.id,
+                    entityId: user.id,
+                    details: {
+                        method: 'google',
+                        assignedTrialPlan: trialPlan,
+                    },
                 });
             }
             else if (!user.emailVerified) {
@@ -234,6 +269,7 @@ exports.AuthService = AuthService = __decorate([
     __metadata("design:paramtypes", [users_service_1.UsersService,
         jwt_1.JwtService,
         mailer_service_1.MailerService,
-        firebase_service_1.FirebaseService])
+        firebase_service_1.FirebaseService,
+        audit_service_1.AuditService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

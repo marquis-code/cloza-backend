@@ -23,6 +23,7 @@ const conversations_module_1 = require("./modules/conversations/conversations.mo
 const mailer_module_1 = require("./modules/mailer/mailer.module");
 const firebase_module_1 = require("./common/firebase/firebase.module");
 const bullmq_1 = require("@nestjs/bullmq");
+const audit_module_1 = require("./modules/audit/audit.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -55,6 +56,7 @@ exports.AppModule = AppModule = __decorate([
             conversations_module_1.ConversationsModule,
             mailer_module_1.MailerModule,
             firebase_module_1.FirebaseModule,
+            audit_module_1.AuditModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

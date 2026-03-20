@@ -52,6 +52,8 @@ export declare class CommerceController {
                     passwordResetToken: string | null;
                     passwordResetTokenExpiresAt: Date | null;
                     deletedAt: Date | null;
+                    trialPlan: string | null;
+                    trialEndsAt: Date | null;
                 };
             } & {
                 id: string;

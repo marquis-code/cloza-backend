@@ -2,12 +2,14 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { MailerService } from '../mailer/mailer.service';
 import { FirebaseService } from '../../common/firebase/firebase.service';
+import { AuditService } from '../audit/audit.service';
 export declare class AuthService {
     private usersService;
     private jwtService;
     private mailerService;
     private firebaseService;
-    constructor(usersService: UsersService, jwtService: JwtService, mailerService: MailerService, firebaseService: FirebaseService);
+    private auditService;
+    constructor(usersService: UsersService, jwtService: JwtService, mailerService: MailerService, firebaseService: FirebaseService, auditService: AuditService);
     validateUser(email: string, pass: string): Promise<any>;
     login(user: any): Promise<{
         message: string;

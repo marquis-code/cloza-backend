@@ -71,7 +71,10 @@ model User {
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
   deletedAt     DateTime?
+  trialPlan     String?
+  trialEndsAt   DateTime?
   workspaces    WorkspaceMember[]
+  auditLogs     AuditLog[]
 }
 
 model Workspace {
@@ -95,6 +98,7 @@ model Workspace {
   subscription               Subscription?
   payoutAccounts             PayoutAccount[]
   conversations              Conversation[]
+  auditLogs                  AuditLog[]
 }
 
 model WorkspaceMember {
@@ -285,4 +289,20 @@ model OrderItem {
 
   order   Order   @relation(fields: [orderId], references: [id])
   product Product @relation(fields: [productId], references: [id])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  workspaceId String?
+  userId      String?
+  action      String   // E.g., "USER_REGISTERED", "WORKSPACE_CREATED"
+  entityType  String   // E.g., "USER", "WORKSPACE", "SUBSCRIPTION"
+  entityId    String?  // E.g., the UUID of the affected entity
+  details     Json?    // Optional metadata about the change
+  ipAddress   String?  // IP of the requester (optional)
+  userAgent   String?  // User agent string (optional)
+  createdAt   DateTime @default(now())
+
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id])
+  user        User?      @relation(fields: [userId], references: [id])
 }

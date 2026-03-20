@@ -13,6 +13,16 @@ export declare class WorkspacesController {
             role: import("@prisma/client").$Enums.UserRole;
             userId: string;
         }[];
+        subscription: {
+            id: string;
+            plan: string;
+            createdAt: Date;
+            updatedAt: Date;
+            workspaceId: string;
+            status: string;
+            paystackCustomerId: string | null;
+            currentPeriodEnd: Date | null;
+        } | null;
     } & {
         id: string;
         name: string;

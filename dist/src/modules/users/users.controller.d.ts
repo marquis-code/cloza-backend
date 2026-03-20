@@ -21,6 +21,8 @@ export declare class UsersController {
         passwordResetToken: string | null;
         passwordResetTokenExpiresAt: Date | null;
         deletedAt: Date | null;
+        trialPlan: string | null;
+        trialEndsAt: Date | null;
     } | null>;
     updateProfile(req: any, updateUserDto: UpdateUserDto): Promise<{
         id: string;
@@ -38,6 +40,8 @@ export declare class UsersController {
         passwordResetToken: string | null;
         passwordResetTokenExpiresAt: Date | null;
         deletedAt: Date | null;
+        trialPlan: string | null;
+        trialEndsAt: Date | null;
     }>;
     markAsOnboarded(req: any): Promise<{
         id: string;
@@ -55,5 +59,7 @@ export declare class UsersController {
         passwordResetToken: string | null;
         passwordResetTokenExpiresAt: Date | null;
         deletedAt: Date | null;
+        trialPlan: string | null;
+        trialEndsAt: Date | null;
     }>;
 }

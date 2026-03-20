@@ -24,6 +24,8 @@ export declare class JwtStrategy extends JwtStrategy_base {
         passwordResetToken: string | null;
         passwordResetTokenExpiresAt: Date | null;
         deletedAt: Date | null;
+        trialPlan: string | null;
+        trialEndsAt: Date | null;
     }>;
 }
 export {};
