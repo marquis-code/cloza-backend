@@ -198,9 +198,11 @@ let AuthService = class AuthService {
                         assignedTrialPlan: trialPlan,
                     },
                 });
+                await this.mailerService.sendWelcomeEmail(user.email, user.name || 'there');
             }
             else if (!user.emailVerified) {
                 await this.usersService.update(user.id, { emailVerified: true });
+                await this.mailerService.sendWelcomeEmail(user.email, user.name || 'there');
             }
             const payload = { email: user.email, sub: user.id };
             return {
@@ -235,6 +237,7 @@ let AuthService = class AuthService {
             verificationCode: null,
             verificationCodeExpiresAt: null,
         });
+        await this.mailerService.sendWelcomeEmail(updatedUser.email, updatedUser.name || 'there');
         return this.login(updatedUser);
     }
     async forgotPassword(email) {
