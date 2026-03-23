@@ -8,15 +8,15 @@ export declare class ConversationsController {
         createdAt: Date;
         updatedAt: Date;
         workspaceId: string;
-        platform: import("@prisma/client").$Enums.Platform;
         customerId: string;
+        platform: import("@prisma/client").$Enums.Platform;
         lastMessageAt: Date;
     }>;
     sendMessage(req: any, dto: CreateMessageDto): Promise<{
         id: string;
         createdAt: Date;
-        type: import("@prisma/client").$Enums.MessageType;
         content: string;
+        type: import("@prisma/client").$Enums.MessageType;
         senderId: string;
         senderType: import("@prisma/client").$Enums.SenderType;
         payload: import("@prisma/client/runtime/client").JsonValue | null;
@@ -25,20 +25,20 @@ export declare class ConversationsController {
     getConversations(workspaceId: string): Promise<({
         customer: {
             id: string;
+            email: string | null;
             name: string;
             createdAt: Date;
             updatedAt: Date;
             workspaceId: string;
-            email: string | null;
-            phone: string | null;
             platform: import("@prisma/client").$Enums.Platform | null;
+            phone: string | null;
             platformCustomerId: string | null;
         };
         messages: {
             id: string;
             createdAt: Date;
-            type: import("@prisma/client").$Enums.MessageType;
             content: string;
+            type: import("@prisma/client").$Enums.MessageType;
             senderId: string;
             senderType: import("@prisma/client").$Enums.SenderType;
             payload: import("@prisma/client/runtime/client").JsonValue | null;
@@ -49,15 +49,15 @@ export declare class ConversationsController {
         createdAt: Date;
         updatedAt: Date;
         workspaceId: string;
-        platform: import("@prisma/client").$Enums.Platform;
         customerId: string;
+        platform: import("@prisma/client").$Enums.Platform;
         lastMessageAt: Date;
     })[]>;
     getMessages(id: string): Promise<{
         id: string;
         createdAt: Date;
-        type: import("@prisma/client").$Enums.MessageType;
         content: string;
+        type: import("@prisma/client").$Enums.MessageType;
         senderId: string;
         senderType: import("@prisma/client").$Enums.SenderType;
         payload: import("@prisma/client/runtime/client").JsonValue | null;

@@ -10,22 +10,24 @@ export declare class WorkspacesController {
             createdAt: Date;
             updatedAt: Date;
             workspaceId: string;
-            role: import("@prisma/client").$Enums.UserRole;
             userId: string;
+            role: import("@prisma/client").$Enums.UserRole;
         }[];
         subscription: {
             id: string;
-            plan: string;
             createdAt: Date;
             updatedAt: Date;
             workspaceId: string;
             status: string;
+            plan: string;
             paystackCustomerId: string | null;
             currentPeriodEnd: Date | null;
         } | null;
     } & {
         id: string;
         name: string;
+        createdAt: Date;
+        updatedAt: Date;
         plan: string;
         businessCategory: string | null;
         businessLocation: string | null;
@@ -33,8 +35,6 @@ export declare class WorkspacesController {
         paymentConfirmationMessage: string | null;
         followUpReminders: boolean;
         newBuyerAlerts: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     findAll(req: any): Promise<({
         members: {
@@ -42,12 +42,14 @@ export declare class WorkspacesController {
             createdAt: Date;
             updatedAt: Date;
             workspaceId: string;
-            role: import("@prisma/client").$Enums.UserRole;
             userId: string;
+            role: import("@prisma/client").$Enums.UserRole;
         }[];
     } & {
         id: string;
         name: string;
+        createdAt: Date;
+        updatedAt: Date;
         plan: string;
         businessCategory: string | null;
         businessLocation: string | null;
@@ -55,15 +57,13 @@ export declare class WorkspacesController {
         paymentConfirmationMessage: string | null;
         followUpReminders: boolean;
         newBuyerAlerts: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     })[]>;
     findOne(id: string): Promise<({
         members: ({
             user: {
                 id: string;
-                name: string | null;
                 email: string;
+                name: string | null;
                 avatarUrl: string | null;
                 phoneNumber: string | null;
             };
@@ -72,8 +72,8 @@ export declare class WorkspacesController {
             createdAt: Date;
             updatedAt: Date;
             workspaceId: string;
-            role: import("@prisma/client").$Enums.UserRole;
             userId: string;
+            role: import("@prisma/client").$Enums.UserRole;
         })[];
         payoutAccounts: {
             id: string;
@@ -87,6 +87,8 @@ export declare class WorkspacesController {
     } & {
         id: string;
         name: string;
+        createdAt: Date;
+        updatedAt: Date;
         plan: string;
         businessCategory: string | null;
         businessLocation: string | null;
@@ -94,12 +96,12 @@ export declare class WorkspacesController {
         paymentConfirmationMessage: string | null;
         followUpReminders: boolean;
         newBuyerAlerts: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }) | null>;
     update(id: string, updateWorkspaceDto: UpdateWorkspaceDto): Promise<{
         id: string;
         name: string;
+        createdAt: Date;
+        updatedAt: Date;
         plan: string;
         businessCategory: string | null;
         businessLocation: string | null;
@@ -107,7 +109,5 @@ export declare class WorkspacesController {
         paymentConfirmationMessage: string | null;
         followUpReminders: boolean;
         newBuyerAlerts: boolean;
-        createdAt: Date;
-        updatedAt: Date;
     }>;
 }

@@ -7,10 +7,8 @@ export declare class UsersController {
     constructor(usersService: UsersService, mailerService: MailerService);
     getProfile(req: any): Promise<{
         id: string;
-        name: string | null;
-        createdAt: Date;
-        updatedAt: Date;
         email: string;
+        name: string | null;
         password: string;
         avatarUrl: string | null;
         phoneNumber: string | null;
@@ -20,16 +18,16 @@ export declare class UsersController {
         verificationCodeExpiresAt: Date | null;
         passwordResetToken: string | null;
         passwordResetTokenExpiresAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
         deletedAt: Date | null;
         trialPlan: string | null;
         trialEndsAt: Date | null;
     } | null>;
     updateProfile(req: any, updateUserDto: UpdateUserDto): Promise<{
         id: string;
-        name: string | null;
-        createdAt: Date;
-        updatedAt: Date;
         email: string;
+        name: string | null;
         password: string;
         avatarUrl: string | null;
         phoneNumber: string | null;
@@ -39,16 +37,16 @@ export declare class UsersController {
         verificationCodeExpiresAt: Date | null;
         passwordResetToken: string | null;
         passwordResetTokenExpiresAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
         deletedAt: Date | null;
         trialPlan: string | null;
         trialEndsAt: Date | null;
     }>;
     markAsOnboarded(req: any): Promise<{
         id: string;
-        name: string | null;
-        createdAt: Date;
-        updatedAt: Date;
         email: string;
+        name: string | null;
         password: string;
         avatarUrl: string | null;
         phoneNumber: string | null;
@@ -58,6 +56,8 @@ export declare class UsersController {
         verificationCodeExpiresAt: Date | null;
         passwordResetToken: string | null;
         passwordResetTokenExpiresAt: Date | null;
+        createdAt: Date;
+        updatedAt: Date;
         deletedAt: Date | null;
         trialPlan: string | null;
         trialEndsAt: Date | null;

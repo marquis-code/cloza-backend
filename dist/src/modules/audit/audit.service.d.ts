@@ -15,12 +15,12 @@ export declare class AuditService {
     }): Promise<void>;
     findAll(query?: any): Promise<{
         data: ({
+            user: {
+                email: string;
+                name: string | null;
+            } | null;
             workspace: {
                 name: string;
-            } | null;
-            user: {
-                name: string | null;
-                email: string;
             } | null;
         } & {
             id: string;

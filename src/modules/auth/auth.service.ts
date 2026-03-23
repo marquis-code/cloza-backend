@@ -102,8 +102,9 @@ export class AuthService {
 
     const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 14 days
 
+    const { plan, ...userData } = data;
     const user = await this.usersService.create({
-      ...data,
+      ...userData,
       verificationCode,
       verificationCodeExpiresAt,
       trialPlan,
@@ -215,13 +216,13 @@ export class AuthService {
       throw new BadRequestException('Verification code expired');
     }
 
-    await this.usersService.update(user.id, {
+    const updatedUser = await this.usersService.update(user.id, {
       emailVerified: true,
       verificationCode: null,
       verificationCodeExpiresAt: null,
     });
 
-    return this.login(user);
+    return this.login(updatedUser);
   }
 
   async forgotPassword(email: string) {
