@@ -263,4 +263,31 @@ export class AuthService {
 
     return { message: 'Password reset successful.' };
   }
+
+  async resendVerificationEmail(email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (user.emailVerified) {
+      throw new BadRequestException('Email is already verified');
+    }
+
+    // Generate new 6-digit verification code
+    const verificationCode = randomInt(100000, 999999).toString();
+    const verificationCodeExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+
+    await this.usersService.update(user.id, {
+      verificationCode,
+      verificationCodeExpiresAt,
+    });
+
+    await this.mailerService.sendVerificationEmail(user.email, verificationCode);
+
+    return {
+      message: 'Verification code resent. Please check your email.',
+      email: user.email,
+    };
+  }
 }

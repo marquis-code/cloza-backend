@@ -4,6 +4,7 @@ import * as admin from 'firebase-admin';
 export declare class FirebaseService implements OnModuleInit {
     private configService;
     private firebaseApp;
+    private readonly logger;
     constructor(configService: ConfigService);
     onModuleInit(): void;
     verifyIdToken(idToken: string): Promise<admin.auth.DecodedIdToken>;

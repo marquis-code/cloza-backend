@@ -50,4 +50,11 @@ export class UsersController {
         await this.mailerService.sendWelcomeEmail(user.email, user.name || 'there');
         return user;
     }
+
+    @Get('me/features')
+    @ApiOperation({ summary: 'Get features available to the current user based on their plan' })
+    @ApiResponse({ status: 200, description: 'User features returned successfully' })
+    async getMyFeatures(@Request() req) {
+        return this.usersService.getUserFeatures(req.user.id);
+    }
 }

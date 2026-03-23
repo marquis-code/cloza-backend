@@ -37,6 +37,9 @@ let UsersController = class UsersController {
         await this.mailerService.sendWelcomeEmail(user.email, user.name || 'there');
         return user;
     }
+    async getMyFeatures(req) {
+        return this.usersService.getUserFeatures(req.user.id);
+    }
 };
 exports.UsersController = UsersController;
 __decorate([
@@ -67,6 +70,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "markAsOnboarded", null);
+__decorate([
+    (0, common_1.Get)('me/features'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get features available to the current user based on their plan' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'User features returned successfully' }),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "getMyFeatures", null);
 exports.UsersController = UsersController = __decorate([
     (0, swagger_1.ApiTags)('Users'),
     (0, swagger_1.ApiBearerAuth)(),

@@ -41,35 +41,54 @@ var __importStar = (this && this.__importStar) || (function () {
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var FirebaseService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FirebaseService = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const admin = __importStar(require("firebase-admin"));
-let FirebaseService = class FirebaseService {
+let FirebaseService = FirebaseService_1 = class FirebaseService {
     configService;
-    firebaseApp;
+    firebaseApp = null;
+    logger = new common_1.Logger(FirebaseService_1.name);
     constructor(configService) {
         this.configService = configService;
     }
     onModuleInit() {
         const projectId = this.configService.get('FIREBASE_PROJECT_ID');
         const clientEmail = this.configService.get('FIREBASE_CLIENT_EMAIL');
-        const privateKey = this.configService.get('FIREBASE_PRIVATE_KEY')?.replace(/\\n/g, '\n');
-        if (!admin.apps.length) {
-            this.firebaseApp = admin.initializeApp({
-                credential: admin.credential.cert({
-                    projectId,
-                    clientEmail,
-                    privateKey,
-                }),
-            });
+        let privateKey = this.configService.get('FIREBASE_PRIVATE_KEY');
+        if (privateKey) {
+            privateKey = privateKey.replace(/\\n/g, '\n').replace(/^"|"$/g, '');
         }
-        else {
-            this.firebaseApp = admin.app();
+        if (!projectId || !clientEmail || !privateKey) {
+            this.logger.warn('Firebase credentials not fully configured. Google login will be unavailable.');
+            return;
+        }
+        try {
+            if (!admin.apps.length) {
+                this.firebaseApp = admin.initializeApp({
+                    credential: admin.credential.cert({
+                        projectId,
+                        clientEmail,
+                        privateKey,
+                    }),
+                });
+            }
+            else {
+                this.firebaseApp = admin.app();
+            }
+            this.logger.log('Firebase initialized successfully.');
+        }
+        catch (error) {
+            this.logger.error('Firebase initialization failed. Google login will be unavailable.', error.message);
+            this.firebaseApp = null;
         }
     }
     async verifyIdToken(idToken) {
+        if (!this.firebaseApp) {
+            throw new Error('Firebase is not initialized. Google login is unavailable.');
+        }
         try {
             return await this.firebaseApp.auth().verifyIdToken(idToken);
         }
@@ -79,7 +98,7 @@ let FirebaseService = class FirebaseService {
     }
 };
 exports.FirebaseService = FirebaseService;
-exports.FirebaseService = FirebaseService = __decorate([
+exports.FirebaseService = FirebaseService = FirebaseService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [config_1.ConfigService])
 ], FirebaseService);

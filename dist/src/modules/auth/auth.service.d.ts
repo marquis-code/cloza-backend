@@ -56,4 +56,8 @@ export declare class AuthService {
     resetPassword(token: string, newPassword: any): Promise<{
         message: string;
     }>;
+    resendVerificationEmail(email: string): Promise<{
+        message: string;
+        email: string;
+    }>;
 }

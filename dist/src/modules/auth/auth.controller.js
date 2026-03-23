@@ -48,6 +48,9 @@ let AuthController = class AuthController {
     async resetPassword(body) {
         return this.authService.resetPassword(body.token, body.newPassword);
     }
+    async resendVerification(body) {
+        return this.authService.resendVerificationEmail(body.email);
+    }
 };
 exports.AuthController = AuthController;
 __decorate([
@@ -115,6 +118,16 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "resetPassword", null);
+__decorate([
+    (0, common_1.Post)('resend-verification'),
+    (0, swagger_1.ApiOperation)({ summary: 'Resend email verification code' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Verification code resent' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'User not found or email already verified' }),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "resendVerification", null);
 exports.AuthController = AuthController = __decorate([
     (0, swagger_1.ApiTags)('Auth'),
     (0, common_1.Controller)('auth'),

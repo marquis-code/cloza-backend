@@ -62,4 +62,17 @@ export declare class UsersController {
         trialPlan: string | null;
         trialEndsAt: Date | null;
     }>;
+    getMyFeatures(req: any): Promise<{
+        activePlan: string;
+        planName: string;
+        features: string[];
+        featureSlugs: string[];
+        limits: {
+            socialAccounts: number;
+            quickReplies: number;
+            paymentLinks: number;
+            scheduledPosts: number;
+            teamMembers: number;
+        };
+    }>;
 }

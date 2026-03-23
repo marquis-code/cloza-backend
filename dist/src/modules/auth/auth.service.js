@@ -262,6 +262,26 @@ let AuthService = class AuthService {
         });
         return { message: 'Password reset successful.' };
     }
+    async resendVerificationEmail(email) {
+        const user = await this.usersService.findByEmail(email);
+        if (!user) {
+            throw new common_1.BadRequestException('User not found');
+        }
+        if (user.emailVerified) {
+            throw new common_1.BadRequestException('Email is already verified');
+        }
+        const verificationCode = (0, crypto_1.randomInt)(100000, 999999).toString();
+        const verificationCodeExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+        await this.usersService.update(user.id, {
+            verificationCode,
+            verificationCodeExpiresAt,
+        });
+        await this.mailerService.sendVerificationEmail(user.email, verificationCode);
+        return {
+            message: 'Verification code resent. Please check your email.',
+            email: user.email,
+        };
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
