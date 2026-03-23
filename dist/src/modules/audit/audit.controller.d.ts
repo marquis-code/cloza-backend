@@ -4,12 +4,12 @@ export declare class AuditController {
     constructor(auditService: AuditService);
     findAll(query: any): Promise<{
         data: ({
+            user: {
+                email: string;
+                name: string | null;
+            } | null;
             workspace: {
                 name: string;
-            } | null;
-            user: {
-                name: string | null;
-                email: string;
             } | null;
         } & {
             id: string;

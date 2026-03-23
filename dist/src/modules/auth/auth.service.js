@@ -130,8 +130,9 @@ let AuthService = class AuthService {
             trialPlan = 'business';
         }
         const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+        const { plan, ...userData } = data;
         const user = await this.usersService.create({
-            ...data,
+            ...userData,
             verificationCode,
             verificationCodeExpiresAt,
             trialPlan,
@@ -197,9 +198,11 @@ let AuthService = class AuthService {
                         assignedTrialPlan: trialPlan,
                     },
                 });
+                await this.mailerService.sendWelcomeEmail(user.email, user.name || 'there');
             }
             else if (!user.emailVerified) {
                 await this.usersService.update(user.id, { emailVerified: true });
+                await this.mailerService.sendWelcomeEmail(user.email, user.name || 'there');
             }
             const payload = { email: user.email, sub: user.id };
             return {
@@ -229,12 +232,13 @@ let AuthService = class AuthService {
         if (!user.verificationCodeExpiresAt || user.verificationCodeExpiresAt < new Date()) {
             throw new common_1.BadRequestException('Verification code expired');
         }
-        await this.usersService.update(user.id, {
+        const updatedUser = await this.usersService.update(user.id, {
             emailVerified: true,
             verificationCode: null,
             verificationCodeExpiresAt: null,
         });
-        return this.login(user);
+        await this.mailerService.sendWelcomeEmail(updatedUser.email, updatedUser.name || 'there');
+        return this.login(updatedUser);
     }
     async forgotPassword(email) {
         const user = await this.usersService.findByEmail(email);

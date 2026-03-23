@@ -4,6 +4,7 @@ import axios from 'axios';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { OrderStatus, MessageType, SenderType } from '@prisma/client';
 import { ConversationsService } from '../conversations/conversations.service';
+import { MailerService } from '../mailer/mailer.service';
 
 @Injectable()
 export class PaymentsService {
@@ -14,6 +15,7 @@ export class PaymentsService {
     private configService: ConfigService,
     private prisma: PrismaService,
     private conversationsService: ConversationsService,
+    private mailerService: MailerService,
   ) { }
 
   async createPaymentLink(orderId: string, conversationId?: string) {
@@ -92,14 +94,57 @@ export class PaymentsService {
     const reference = body.data.reference;
 
     if (event === 'charge.success') {
-      await this.prisma.order.update({
+      const order = await this.prisma.order.update({
         where: { id: reference },
         data: {
           status: OrderStatus.PAID,
           paidAt: new Date(),
         },
+        include: {
+          customer: true,
+          items: {
+            include: {
+              product: true,
+            },
+          },
+          workspace: {
+            include: {
+              members: {
+                where: { role: 'OWNER' },
+                include: { user: true },
+              },
+            },
+          },
+        },
       });
+
       this.logger.log(`Order ${reference} marked as PAID via webhook`);
+
+      // Send payment confirmation to customer
+      if (order.customer.email) {
+        await this.mailerService.sendOrderConfirmation(
+          order.customer.email,
+          order.customer.name,
+          order.id,
+          `${order.totalAmount} ${order.currency}`,
+          order.items.map((i) => ({
+            name: i.product.name,
+            quantity: i.quantity,
+            price: `${i.price} ${order.currency}`,
+          })),
+        );
+      }
+
+      // Notify merchant/owner about the payment
+      const owners = order.workspace.members;
+      for (const owner of owners) {
+        await this.mailerService.sendNewBuyerAlert(
+          owner.user.email,
+          owner.user.name || 'Merchant',
+          `${order.totalAmount} ${order.currency}`,
+          'Cloza Checkout'
+        );
+      }
     }
 
     return { status: 'success' };

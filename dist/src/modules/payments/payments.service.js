@@ -20,16 +20,19 @@ const axios_1 = __importDefault(require("axios"));
 const prisma_service_1 = require("../../common/prisma/prisma.service");
 const client_1 = require("@prisma/client");
 const conversations_service_1 = require("../conversations/conversations.service");
+const mailer_service_1 = require("../mailer/mailer.service");
 let PaymentsService = PaymentsService_1 = class PaymentsService {
     configService;
     prisma;
     conversationsService;
+    mailerService;
     logger = new common_1.Logger(PaymentsService_1.name);
     paystackBaseUrl = 'https://api.paystack.co';
-    constructor(configService, prisma, conversationsService) {
+    constructor(configService, prisma, conversationsService, mailerService) {
         this.configService = configService;
         this.prisma = prisma;
         this.conversationsService = conversationsService;
+        this.mailerService = mailerService;
     }
     async createPaymentLink(orderId, conversationId) {
         const order = await this.prisma.order.findUnique({
@@ -88,14 +91,41 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
         const event = body.event;
         const reference = body.data.reference;
         if (event === 'charge.success') {
-            await this.prisma.order.update({
+            const order = await this.prisma.order.update({
                 where: { id: reference },
                 data: {
                     status: client_1.OrderStatus.PAID,
                     paidAt: new Date(),
                 },
+                include: {
+                    customer: true,
+                    items: {
+                        include: {
+                            product: true,
+                        },
+                    },
+                    workspace: {
+                        include: {
+                            members: {
+                                where: { role: 'OWNER' },
+                                include: { user: true },
+                            },
+                        },
+                    },
+                },
             });
             this.logger.log(`Order ${reference} marked as PAID via webhook`);
+            if (order.customer.email) {
+                await this.mailerService.sendOrderConfirmation(order.customer.email, order.customer.name, order.id, `${order.totalAmount} ${order.currency}`, order.items.map((i) => ({
+                    name: i.product.name,
+                    quantity: i.quantity,
+                    price: `${i.price} ${order.currency}`,
+                })));
+            }
+            const owners = order.workspace.members;
+            for (const owner of owners) {
+                await this.mailerService.sendNewBuyerAlert(owner.user.email, owner.user.name || 'Merchant', `${order.totalAmount} ${order.currency}`, 'Cloza Checkout');
+            }
         }
         return { status: 'success' };
     }
@@ -105,6 +135,7 @@ exports.PaymentsService = PaymentsService = PaymentsService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [config_1.ConfigService,
         prisma_service_1.PrismaService,
-        conversations_service_1.ConversationsService])
+        conversations_service_1.ConversationsService,
+        mailer_service_1.MailerService])
 ], PaymentsService);
 //# sourceMappingURL=payments.service.js.map

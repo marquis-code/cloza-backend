@@ -102,8 +102,9 @@ export class AuthService {
 
     const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 14 days
 
+    const { plan, ...userData } = data;
     const user = await this.usersService.create({
-      ...data,
+      ...userData,
       verificationCode,
       verificationCodeExpiresAt,
       trialPlan,
@@ -179,9 +180,15 @@ export class AuthService {
             assignedTrialPlan: trialPlan,
           },
         });
+
+        // Send welcome email for new social users
+        await this.mailerService.sendWelcomeEmail(user.email, user.name || 'there');
       } else if (!user.emailVerified) {
         // Automatically verify email if they login via Google
         await this.usersService.update(user.id, { emailVerified: true });
+        
+        // Send welcome email after first-time social verification
+        await this.mailerService.sendWelcomeEmail(user.email, user.name || 'there');
       }
 
       const payload = { email: user.email, sub: user.id };
@@ -215,13 +222,16 @@ export class AuthService {
       throw new BadRequestException('Verification code expired');
     }
 
-    await this.usersService.update(user.id, {
+    const updatedUser = await this.usersService.update(user.id, {
       emailVerified: true,
       verificationCode: null,
       verificationCodeExpiresAt: null,
     });
 
-    return this.login(user);
+    // Send welcome email after successful manual verification
+    await this.mailerService.sendWelcomeEmail(updatedUser.email, updatedUser.name || 'there');
+
+    return this.login(updatedUser);
   }
 
   async forgotPassword(email: string) {
