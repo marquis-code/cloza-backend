@@ -1,8 +1,12 @@
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { UserRole } from '@prisma/client';
+import { MailerService } from '../mailer/mailer.service';
+import { AuditService } from '../audit/audit.service';
 export declare class WorkspacesService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private mailerService;
+    private auditService;
+    constructor(prisma: PrismaService, mailerService: MailerService, auditService: AuditService);
     create(name: string, userId: string): Promise<{
         members: {
             id: string;
@@ -12,6 +16,16 @@ export declare class WorkspacesService {
             role: import("@prisma/client").$Enums.UserRole;
             userId: string;
         }[];
+        subscription: {
+            id: string;
+            plan: string;
+            createdAt: Date;
+            updatedAt: Date;
+            workspaceId: string;
+            status: string;
+            paystackCustomerId: string | null;
+            currentPeriodEnd: Date | null;
+        } | null;
     } & {
         id: string;
         name: string;
@@ -100,6 +114,39 @@ export declare class WorkspacesService {
         updatedAt: Date;
     }>;
     addMember(workspaceId: string, userId: string, role?: UserRole): Promise<{
+        workspace: {
+            id: string;
+            name: string;
+            plan: string;
+            businessCategory: string | null;
+            businessLocation: string | null;
+            defaultCurrency: string;
+            paymentConfirmationMessage: string | null;
+            followUpReminders: boolean;
+            newBuyerAlerts: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+        user: {
+            id: string;
+            name: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            email: string;
+            password: string;
+            avatarUrl: string | null;
+            phoneNumber: string | null;
+            emailVerified: boolean;
+            isOnboarded: boolean;
+            verificationCode: string | null;
+            verificationCodeExpiresAt: Date | null;
+            passwordResetToken: string | null;
+            passwordResetTokenExpiresAt: Date | null;
+            deletedAt: Date | null;
+            trialPlan: string | null;
+            trialEndsAt: Date | null;
+        };
+    } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;

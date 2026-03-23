@@ -12,8 +12,10 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { MediaModule } from './modules/media/media.module';
 import { ConversationsModule } from './modules/conversations/conversations.module';
 import { MailerModule } from './modules/mailer/mailer.module';
+import { FirebaseModule } from './common/firebase/firebase.module';
 
 import { BullModule } from '@nestjs/bullmq';
+import { AuditModule } from './modules/audit/audit.module';
 
 @Module({
   imports: [
@@ -42,6 +44,8 @@ import { BullModule } from '@nestjs/bullmq';
     MediaModule,
     ConversationsModule,
     MailerModule,
+    FirebaseModule,
+    AuditModule,
   ],
   controllers: [AppController],
   providers: [AppService],

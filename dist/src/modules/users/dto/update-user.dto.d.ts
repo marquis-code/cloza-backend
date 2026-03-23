@@ -4,4 +4,5 @@ export declare class UpdateUserDto {
     phoneNumber?: string;
     avatarUrl?: string;
     password?: string;
+    isOnboarded?: boolean;
 }

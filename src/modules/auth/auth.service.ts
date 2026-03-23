@@ -4,6 +4,8 @@ import { UsersService } from '../users/users.service';
 import { MailerService } from '../mailer/mailer.service';
 import * as bcrypt from 'bcrypt';
 import { randomBytes, randomInt } from 'crypto';
+import { FirebaseService } from '../../common/firebase/firebase.service';
+import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class AuthService {
@@ -11,6 +13,8 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private mailerService: MailerService,
+    private firebaseService: FirebaseService,
+    private auditService: AuditService,
   ) { }
 
   async validateUser(email: string, pass: string): Promise<any> {
@@ -90,18 +94,111 @@ export class AuthService {
     const verificationCode = randomInt(100000, 999999).toString();
     const verificationCodeExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
 
+    // Map selected plan to trial plan
+    let trialPlan = 'pro'; // Default to Pro for Free or Pro selections
+    if (data.plan && (data.plan.toLowerCase() === 'business')) {
+      trialPlan = 'business';
+    }
+
+    const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 14 days
+
     const user = await this.usersService.create({
       ...data,
       verificationCode,
       verificationCodeExpiresAt,
+      trialPlan,
+      trialEndsAt,
     });
 
-    await this.mailerService.sendVerificationEmail(user.email, verificationCode);
+    await this.auditService.logAction({
+      action: 'USER_REGISTERED',
+      entityType: 'USER',
+      userId: user.id,
+      entityId: user.id,
+      details: {
+        method: 'email',
+        requestedPlan: data.plan || 'none',
+        assignedTrialPlan: trialPlan,
+      },
+    });
+
+    try {
+      await this.mailerService.sendVerificationEmail(user.email, verificationCode);
+    } catch (error) {
+      console.error('Failed to send verification email:', error);
+      // We don't throw here to avoid 500. The user is created, but they might need to resend the code.
+      return {
+        message: 'Registration successful, but we couldn\'t send the verification email. Please try requesting a new code.',
+        email: user.email,
+        error: 'EMAIL_SEND_FAILED',
+      };
+    }
 
     return {
       message: 'Registration successful. Please check your email for verification code.',
       email: user.email,
     };
+  }
+
+  async googleLogin(idToken: string) {
+    try {
+      const decodedToken = await this.firebaseService.verifyIdToken(idToken);
+      const email = decodedToken.email;
+      const name = decodedToken.name;
+      const picture = decodedToken.picture;
+
+      if (!email) {
+        throw new BadRequestException('Email not provided in Google token');
+      }
+
+      let user = await this.usersService.findByEmail(email);
+
+      if (!user) {
+        // Create user if they don't exist
+        const trialPlan = 'pro';
+        const trialEndsAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000); // 14 days
+        
+        user = await this.usersService.create({
+          email,
+          name: name || email.split('@')[0],
+          avatarUrl: picture,
+          emailVerified: true,
+          isOnboarded: false,
+          password: randomBytes(16).toString('hex'), // Random password for social users
+          trialPlan,
+          trialEndsAt,
+        });
+
+        await this.auditService.logAction({
+          action: 'USER_REGISTERED',
+          entityType: 'USER',
+          userId: user.id,
+          entityId: user.id,
+          details: {
+            method: 'google',
+            assignedTrialPlan: trialPlan,
+          },
+        });
+      } else if (!user.emailVerified) {
+        // Automatically verify email if they login via Google
+        await this.usersService.update(user.id, { emailVerified: true });
+      }
+
+      const payload = { email: user.email, sub: user.id };
+      return {
+        access_token: this.jwtService.sign(payload),
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          avatarUrl: user.avatarUrl,
+          isOnboarded: user.isOnboarded,
+        },
+      };
+    } catch (error) {
+      console.error('Google login failed:', error);
+      throw new UnauthorizedException('Invalid Google token');
+    }
   }
 
   async verifyEmail(email: string, code: string) {
@@ -165,5 +262,32 @@ export class AuthService {
     });
 
     return { message: 'Password reset successful.' };
+  }
+
+  async resendVerificationEmail(email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (user.emailVerified) {
+      throw new BadRequestException('Email is already verified');
+    }
+
+    // Generate new 6-digit verification code
+    const verificationCode = randomInt(100000, 999999).toString();
+    const verificationCodeExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+
+    await this.usersService.update(user.id, {
+      verificationCode,
+      verificationCodeExpiresAt,
+    });
+
+    await this.mailerService.sendVerificationEmail(user.email, verificationCode);
+
+    return {
+      message: 'Verification code resent. Please check your email.',
+      email: user.email,
+    };
   }
 }

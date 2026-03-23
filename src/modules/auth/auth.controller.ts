@@ -43,6 +43,14 @@ export class AuthController {
     return this.authService.login(user);
   }
 
+  @Post('google')
+  @ApiOperation({ summary: 'Login with Google' })
+  @ApiResponse({ status: 200, description: 'Token generated' })
+  @ApiResponse({ status: 401, description: 'Invalid Google token' })
+  async googleLogin(@Body('idToken') idToken: string) {
+    return this.authService.googleLogin(idToken);
+  }
+
   @Post('verify-email')
   @ApiOperation({ summary: 'Verify user email (Signup)' })
   async verifyEmail(@Body() body: { email: string; code: string }) {
@@ -65,5 +73,13 @@ export class AuthController {
   @ApiOperation({ summary: 'Reset password' })
   async resetPassword(@Body() body: { token: string; newPassword: any }) {
     return this.authService.resetPassword(body.token, body.newPassword);
+  }
+
+  @Post('resend-verification')
+  @ApiOperation({ summary: 'Resend email verification code' })
+  @ApiResponse({ status: 200, description: 'Verification code resent' })
+  @ApiResponse({ status: 400, description: 'User not found or email already verified' })
+  async resendVerification(@Body() body: { email: string }) {
+    return this.authService.resendVerificationEmail(body.email);
   }
 }

@@ -13,10 +13,13 @@ exports.CommerceService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../common/prisma/prisma.service");
 const client_1 = require("@prisma/client");
+const mailer_service_1 = require("../mailer/mailer.service");
 let CommerceService = class CommerceService {
     prisma;
-    constructor(prisma) {
+    mailerService;
+    constructor(prisma, mailerService) {
         this.prisma = prisma;
+        this.mailerService = mailerService;
     }
     async createProduct(workspaceId, data) {
         return this.prisma.product.create({
@@ -56,7 +59,7 @@ let CommerceService = class CommerceService {
             where: { id: { in: itemIds }, workspaceId },
         });
         const totalAmount = products.reduce((acc, p) => acc + Number(p.price), 0);
-        return this.prisma.order.create({
+        const order = await this.prisma.order.create({
             data: {
                 workspaceId,
                 customerId,
@@ -72,10 +75,30 @@ let CommerceService = class CommerceService {
                 },
             },
             include: {
-                items: true,
+                items: {
+                    include: {
+                        product: true,
+                    }
+                },
                 customer: true,
+                workspace: {
+                    include: {
+                        members: {
+                            where: { role: 'OWNER' },
+                            include: { user: true }
+                        }
+                    }
+                }
             },
         });
+        if (order.customer.email) {
+            await this.mailerService.sendOrderConfirmation(order.customer.email, order.customer.name, order.id, `${order.totalAmount} ${order.currency}`, order.items.map(i => ({ name: i.product.name, quantity: i.quantity, price: `${i.price} ${order.currency}` })));
+        }
+        const owners = order.workspace.members;
+        for (const owner of owners) {
+            await this.mailerService.sendNewBuyerAlert(owner.user.email, owner.user.name || 'Merchant', `${order.totalAmount} ${order.currency}`, 'Cloza Checkout');
+        }
+        return order;
     }
     async updateOrderStatus(orderId, status) {
         return this.prisma.order.update({
@@ -101,6 +124,7 @@ let CommerceService = class CommerceService {
 exports.CommerceService = CommerceService;
 exports.CommerceService = CommerceService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        mailer_service_1.MailerService])
 ], CommerceService);
 //# sourceMappingURL=commerce.service.js.map

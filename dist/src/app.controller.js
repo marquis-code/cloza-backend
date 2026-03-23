@@ -12,6 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppController = void 0;
 const common_1 = require("@nestjs/common");
 const app_service_1 = require("./app.service");
+const swagger_1 = require("@nestjs/swagger");
+const plans_1 = require("./common/constants/plans");
 let AppController = class AppController {
     appService;
     constructor(appService) {
@@ -19,6 +21,9 @@ let AppController = class AppController {
     }
     getHello() {
         return this.appService.getHello();
+    }
+    getPlans() {
+        return { plans: plans_1.PLANS };
     }
 };
 exports.AppController = AppController;
@@ -28,7 +33,16 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", String)
 ], AppController.prototype, "getHello", null);
+__decorate([
+    (0, common_1.Get)('plans'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all available pricing plans' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Returns all pricing plans' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getPlans", null);
 exports.AppController = AppController = __decorate([
+    (0, swagger_1.ApiTags)('Public'),
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [app_service_1.AppService])
 ], AppController);

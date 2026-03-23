@@ -8,7 +8,12 @@ export class MailerService {
   private fromEmail: string;
 
   constructor(private configService: ConfigService) {
-    this.resend = new Resend(this.configService.get<string>('RESEND_API_KEY'));
+    const apiKey = this.configService.get<string>('RESEND_API_KEY');
+    if (apiKey) {
+      this.resend = new Resend(apiKey);
+    } else {
+      console.warn('RESEND_API_KEY is not set. Email functionality will be disabled.');
+    }
     this.fromEmail = 'Cloza <onboarding@resend.dev>'; 
   }
 
@@ -67,7 +72,7 @@ export class MailerService {
        <p style="font-size: 14px; color: #666;">This code will expire in 15 minutes. If you didn't create an account, you can safely ignore this email.</p>`
     );
 
-    return this.resend.emails.send({
+    return this.sendEmail({
       from: this.fromEmail,
       to: [email],
       subject: 'Verify Your Email - Cloza',
@@ -83,7 +88,7 @@ export class MailerService {
        <p style="font-size: 14px; color: #666;">This code will expire in 5 minutes. If you didn't request this, please secure your account.</p>`
     );
 
-    return this.resend.emails.send({
+    return this.sendEmail({
       from: this.fromEmail,
       to: [email],
       subject: 'Login Verification Code - Cloza',
@@ -100,7 +105,7 @@ export class MailerService {
       resetLink
     );
 
-    return this.resend.emails.send({
+    return this.sendEmail({
       from: this.fromEmail,
       to: [email],
       subject: 'Reset Your Password - Cloza',
@@ -117,7 +122,7 @@ export class MailerService {
       'https://app.cloza.io/dashboard'
     );
 
-    return this.resend.emails.send({
+    return this.sendEmail({
       from: this.fromEmail,
       to: [email],
       subject: 'Welcome to Cloza!',
@@ -134,7 +139,7 @@ export class MailerService {
       inviteLink
     );
 
-    return this.resend.emails.send({
+    return this.sendEmail({
       from: this.fromEmail,
       to: [email],
       subject: `Invite to join ${workspaceName} - Cloza`,
@@ -167,7 +172,7 @@ export class MailerService {
       `https://app.cloza.io/orders/${orderId}`
     );
 
-    return this.resend.emails.send({
+    return this.sendEmail({
       from: this.fromEmail,
       to: [email],
       subject: `Your Order Confirmation - ${orderId.slice(0, 8).toUpperCase()}`,
@@ -184,11 +189,24 @@ export class MailerService {
       'https://app.cloza.io/dashboard/orders'
     );
 
-    return this.resend.emails.send({
+    return this.sendEmail({
       from: this.fromEmail,
       to: [email],
       subject: 'New Sale Alert! 💰',
       html,
     });
+  }
+
+  async sendEmail(options: any) {
+    if (!this.resend) {
+      console.error('Resend is not initialized. Cannot send email:', options.subject);
+      return null;
+    }
+    try {
+      return await this.resend.emails.send(options);
+    } catch (error) {
+      console.error(`Failed to send email to ${options.to}:`, error);
+      throw error;
+    }
   }
 }

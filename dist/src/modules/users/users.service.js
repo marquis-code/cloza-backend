@@ -46,6 +46,7 @@ exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../common/prisma/prisma.service");
 const bcrypt = __importStar(require("bcrypt"));
+const plans_1 = require("../../common/constants/plans");
 let UsersService = class UsersService {
     prisma;
     constructor(prisma) {
@@ -59,6 +60,11 @@ let UsersService = class UsersService {
     async findById(id) {
         return this.prisma.user.findUnique({
             where: { id },
+        });
+    }
+    async findByResetToken(token) {
+        return this.prisma.user.findFirst({
+            where: { passwordResetToken: token },
         });
     }
     async create(data) {
@@ -78,6 +84,42 @@ let UsersService = class UsersService {
             where: { id },
             data,
         });
+    }
+    async getUserFeatures(userId) {
+        const membership = await this.prisma.workspaceMember.findFirst({
+            where: { userId },
+            include: {
+                workspace: {
+                    include: { subscription: true },
+                },
+            },
+            orderBy: { createdAt: 'asc' },
+        });
+        let activePlanId = 'starter';
+        if (membership) {
+            const workspace = membership.workspace;
+            const sub = workspace.subscription;
+            if (sub && sub.status !== 'canceled' && sub.currentPeriodEnd && sub.currentPeriodEnd > new Date()) {
+                activePlanId = sub.plan;
+            }
+            else {
+                activePlanId = workspace.plan.toLowerCase() === 'free' ? 'starter' : workspace.plan.toLowerCase();
+            }
+        }
+        else {
+            const user = await this.prisma.user.findUnique({ where: { id: userId } });
+            if (user?.trialPlan && user?.trialEndsAt && user.trialEndsAt > new Date()) {
+                activePlanId = user.trialPlan;
+            }
+        }
+        const plan = plans_1.PLANS.find(p => p.id === activePlanId) || plans_1.PLANS[0];
+        return {
+            activePlan: plan.id,
+            planName: plan.name,
+            features: plan.features,
+            featureSlugs: plan.features_slugs || [],
+            limits: plan.limits,
+        };
     }
 };
 exports.UsersService = UsersService;

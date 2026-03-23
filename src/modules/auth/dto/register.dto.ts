@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional } from 'class-validator';
 
 export class RegisterDto {
   @ApiProperty({
@@ -24,4 +24,13 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @ApiProperty({
+    example: 'pro',
+    description: 'The selected billing plan. e.g "starter", "pro", "business"',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  plan?: string;
 }

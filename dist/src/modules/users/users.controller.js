@@ -18,16 +18,27 @@ const users_service_1 = require("./users.service");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const swagger_1 = require("@nestjs/swagger");
 const update_user_dto_1 = require("./dto/update-user.dto");
+const mailer_service_1 = require("../mailer/mailer.service");
 let UsersController = class UsersController {
     usersService;
-    constructor(usersService) {
+    mailerService;
+    constructor(usersService, mailerService) {
         this.usersService = usersService;
+        this.mailerService = mailerService;
     }
     async getProfile(req) {
         return this.usersService.findById(req.user.id);
     }
     async updateProfile(req, updateUserDto) {
         return this.usersService.update(req.user.id, updateUserDto);
+    }
+    async markAsOnboarded(req) {
+        const user = await this.usersService.update(req.user.id, { isOnboarded: true });
+        await this.mailerService.sendWelcomeEmail(user.email, user.name || 'there');
+        return user;
+    }
+    async getMyFeatures(req) {
+        return this.usersService.getUserFeatures(req.user.id);
     }
 };
 exports.UsersController = UsersController;
@@ -50,11 +61,30 @@ __decorate([
     __metadata("design:paramtypes", [Object, update_user_dto_1.UpdateUserDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateProfile", null);
+__decorate([
+    (0, common_1.Patch)('onboard'),
+    (0, swagger_1.ApiOperation)({ summary: 'Mark user as onboarded' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'User marked as onboarded successfully' }),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "markAsOnboarded", null);
+__decorate([
+    (0, common_1.Get)('me/features'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get features available to the current user based on their plan' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'User features returned successfully' }),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "getMyFeatures", null);
 exports.UsersController = UsersController = __decorate([
     (0, swagger_1.ApiTags)('Users'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Controller)('users'),
-    __metadata("design:paramtypes", [users_service_1.UsersService])
+    __metadata("design:paramtypes", [users_service_1.UsersService,
+        mailer_service_1.MailerService])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

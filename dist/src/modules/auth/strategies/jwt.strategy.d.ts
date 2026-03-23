@@ -18,7 +18,14 @@ export declare class JwtStrategy extends JwtStrategy_base {
         avatarUrl: string | null;
         phoneNumber: string | null;
         emailVerified: boolean;
+        isOnboarded: boolean;
+        verificationCode: string | null;
+        verificationCodeExpiresAt: Date | null;
+        passwordResetToken: string | null;
+        passwordResetTokenExpiresAt: Date | null;
         deletedAt: Date | null;
+        trialPlan: string | null;
+        trialEndsAt: Date | null;
     }>;
 }
 export {};

@@ -18,6 +18,7 @@ class UpdateUserDto {
     phoneNumber;
     avatarUrl;
     password;
+    isOnboarded;
 }
 exports.UpdateUserDto = UpdateUserDto;
 __decorate([
@@ -50,4 +51,10 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateUserDto.prototype, "password", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: true, required: false }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateUserDto.prototype, "isOnboarded", void 0);
 //# sourceMappingURL=update-user.dto.js.map

@@ -15,6 +15,8 @@ const jwt_1 = require("@nestjs/jwt");
 const passport_1 = require("@nestjs/passport");
 const jwt_strategy_1 = require("./strategies/jwt.strategy");
 const config_1 = require("@nestjs/config");
+const mailer_module_1 = require("../mailer/mailer.module");
+const firebase_module_1 = require("../../common/firebase/firebase.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -23,6 +25,8 @@ exports.AuthModule = AuthModule = __decorate([
         imports: [
             users_module_1.UsersModule,
             passport_1.PassportModule,
+            mailer_module_1.MailerModule,
+            firebase_module_1.FirebaseModule,
             jwt_1.JwtModule.registerAsync({
                 imports: [config_1.ConfigModule],
                 useFactory: async (configService) => ({
