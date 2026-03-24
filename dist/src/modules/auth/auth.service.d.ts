@@ -17,6 +17,7 @@ export declare class AuthService {
         email: any;
     }>;
     verifyLogin(email: string, code: string): Promise<{
+        message: string;
         access_token: string;
         user: {
             id: string;
@@ -47,8 +48,6 @@ export declare class AuthService {
     }>;
     verifyEmail(email: string, code: string): Promise<{
         message: string;
-        requiresVerification: boolean;
-        email: any;
     }>;
     forgotPassword(email: string): Promise<{
         message: string;
