@@ -20,7 +20,6 @@ async function main() {
       where: { email },
       select: { verificationCode: true }
     });
-    console.log(user?.verificationCode || 'NONE');
   } catch (error) {
     console.error('Error fetching code:', error);
     process.exit(1);
