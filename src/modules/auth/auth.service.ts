@@ -73,6 +73,7 @@ export class AuthService {
 
     const payload = { email: user.email, sub: user.id };
     return {
+      message: 'Welcome back!',
       access_token: this.jwtService.sign(payload),
       user: {
         id: user.id,
@@ -231,7 +232,9 @@ export class AuthService {
     // Send welcome email after successful manual verification
     await this.mailerService.sendWelcomeEmail(updatedUser.email, updatedUser.name || 'there');
 
-    return this.login(updatedUser);
+    return {
+      message: 'Your email has been verified successfully. Please proceed to login.',
+    };
   }
 
   async forgotPassword(email: string) {

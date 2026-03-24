@@ -24,7 +24,6 @@ async function main() {
             stock: 10,
         },
     });
-    console.log(`Created product: ${product.id}`);
 
     // 3. Create a Post linked to the Product
     const post = await prisma.post.create({
