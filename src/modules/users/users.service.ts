@@ -83,9 +83,10 @@ export class UsersService {
 
     return {
       activePlan: plan.id,
-      planName: plan.name,
-      features: plan.features,
-      featureSlugs: plan.features_slugs || [],
+      featureSlugs: (plan.features_slugs || []).reduce((acc: Record<string, boolean>, slug: string) => {
+        acc[slug] = true;
+        return acc;
+      }, {}),
       limits: plan.limits,
     };
   }

@@ -28,23 +28,37 @@ export class MailerService {
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap');
           
-          body { margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Outfit', 'Inter', -apple-system, sans-serif; }
-          .email-wrapper { background-color: #f8fafc; padding: 40px 15px; }
-          .container { 
+          body { 
+            margin: 0; 
+            padding: 0; 
             background-color: #ffffff; 
-            max-width: 580px; 
-            margin: 0 auto; 
-            border-radius: 32px; 
-            padding: 48px 40px; 
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05); 
-            border: 1px solid #e2e8f0;
+            font-family: 'Outfit', 'Inter', -apple-system, sans-serif; 
+            color: #475569;
           }
-          .logo { text-align: center; margin-bottom: 40px; font-size: 28px; font-weight: 800; color: #000; letter-spacing: -1px; }
+          .email-wrapper { 
+            padding: 40px 20px; 
+            max-width: 600px;
+            margin: 0 auto;
+          }
+          .logo-container {
+            text-align: center;
+            margin-bottom: 32px;
+          }
+          .logo-img {
+            max-width: 120px;
+            margin-bottom: 12px;
+          }
+          .logo-text { 
+            font-size: 24px; 
+            font-weight: 800; 
+            color: #0f172a; 
+            letter-spacing: -0.5px; 
+          }
           
           .header { text-align: center; margin-bottom: 32px; }
           .title-pill {
             display: inline-block;
-            padding: 8px 16px;
+            padding: 6px 14px;
             background: #f1f5f9;
             border-radius: 100px;
             margin-bottom: 16px;
@@ -69,22 +83,21 @@ export class MailerService {
             background: #000000;
             color: #ffffff !important; 
             text-decoration: none; 
-            border-radius: 16px; 
+            border-radius: 14px; 
             font-weight: 700; 
             font-size: 15px; 
-            box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.2);
           }
           
           .otp-card { 
             background: #f8fafc; 
-            border-radius: 24px; 
+            border-radius: 20px; 
             padding: 32px; 
             text-align: center; 
             margin: 32px 0; 
-            border: 2px dashed #e2e8f0; 
+            border: 1px solid #e2e8f0; 
           }
           .otp-label { font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 12px; display: block; }
-          .otp-code { font-size: 42px; font-weight: 800; letter-spacing: 12px; color: #0f172a; font-family: 'Outfit', monospace; }
+          .otp-code { font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #0f172a; font-family: 'Outfit', monospace; }
           
           .footer { 
             text-align: center; 
@@ -92,27 +105,30 @@ export class MailerService {
             border-top: 1px solid #f1f5f9;
             margin-top: 40px;
           }
-          .footer-text { font-size: 13px; color: #94a3b8; line-height: 1.6; }
+          .footer-text { font-size: 12px; color: #94a3b8; line-height: 1.6; }
           .footer-brand { font-weight: 700; color: #0f172a; margin-bottom: 8px; font-size: 14px; }
+          .footer-link { color: #94a3b8; text-decoration: none; }
         </style>
       </head>
       <body>
         <div class="email-wrapper">
-          <div class="container">
-            <div class="logo">CLOZA</div>
-            <div class="header">
-              <div class="title-pill"><span>System Notification</span></div>
-              <h1 class="title">${title}</h1>
-            </div>
-            <div class="content">
-              ${content}
-            </div>
-            <div class="footer">
-              <div class="footer-brand">Cloza Technologies</div>
-              <div class="footer-text">
-                &copy; ${new Date().getFullYear()} • Elevate Your Business. Seamlessly.<br>
-                Lagos, Nigeria.
-              </div>
+          <div class="logo-container">
+            <!-- Using a placeholder for the logo. Suggestion: Update this URL once provided. -->
+            <img src="https://getcloza.com/logo.png" alt="Cloza Logo" class="logo-img" onerror="this.style.display='none'">
+            <div class="logo-text">Cloza</div>
+          </div>
+          <div class="header">
+            <div class="title-pill"><span>System Notification</span></div>
+            <h1 class="title">${title}</h1>
+          </div>
+          <div class="content">
+            ${content}
+          </div>
+          <div class="footer">
+            <div class="footer-brand"><a href="https://www.getcloza.com" class="footer-link">www.getcloza.com</a></div>
+            <div class="footer-text">
+              &copy; ${new Date().getFullYear()} • Turn your chats into paid orders<br>
+              Lagos, Nigeria.
             </div>
           </div>
         </div>
