@@ -11,7 +11,7 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   const email = process.argv[2];
   if (!email) {
-    console.error('Email required');
+    // console.error('Email required');
     process.exit(1);
   }
 
