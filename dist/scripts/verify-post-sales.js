@@ -19,7 +19,6 @@ async function main() {
             stock: 10,
         },
     });
-    console.log(`Created product: ${product.id}`);
     const post = await prisma.post.create({
         data: {
             workspaceId: workspace.id,

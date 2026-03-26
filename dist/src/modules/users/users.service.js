@@ -115,9 +115,10 @@ let UsersService = class UsersService {
         const plan = plans_1.PLANS.find(p => p.id === activePlanId) || plans_1.PLANS[0];
         return {
             activePlan: plan.id,
-            planName: plan.name,
-            features: plan.features,
-            featureSlugs: plan.features_slugs || [],
+            featureSlugs: (plan.features_slugs || []).reduce((acc, slug) => {
+                acc[slug] = true;
+                return acc;
+            }, {}),
             limits: plan.limits,
         };
     }

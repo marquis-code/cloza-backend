@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { MailerService } from '../mailer/mailer.service';
@@ -9,6 +9,7 @@ import { AuditService } from '../audit/audit.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
@@ -278,7 +279,13 @@ export class AuthService {
   }
 
   async resendVerificationEmail(email: string) {
-    const user = await this.usersService.findByEmail(email);
+    if (!email) {
+      throw new BadRequestException('Email is required');
+    }
+
+    const sanitizedEmail = email.trim().toLowerCase();
+    const user = await this.usersService.findByEmail(sanitizedEmail);
+    
     if (!user) {
       throw new BadRequestException('User not found');
     }
@@ -291,15 +298,64 @@ export class AuthService {
     const verificationCode = randomInt(100000, 999999).toString();
     const verificationCodeExpiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
 
-    await this.usersService.update(user.id, {
-      verificationCode,
-      verificationCodeExpiresAt,
-    });
+    try {
+      await this.usersService.update(user.id, {
+        verificationCode,
+        verificationCodeExpiresAt,
+      });
 
-    await this.mailerService.sendVerificationEmail(user.email, verificationCode);
+      const emailResult = await this.mailerService.sendVerificationEmail(user.email, verificationCode);
+      if (!emailResult) {
+        throw new Error('Failed to send email via MailerService');
+      }
+    } catch (error) {
+      this.logger.error(`Resend verification failed for ${sanitizedEmail}: ${error.message}`);
+      throw new BadRequestException('Failed to resend verification email. Please try again later.');
+    }
 
     return {
       message: 'Verification code resent. Please check your email.',
+      email: user.email,
+    };
+  }
+
+  async resendLoginVerificationEmail(email: string) {
+    if (!email) {
+      throw new BadRequestException('Email is required');
+    }
+
+    const sanitizedEmail = email.trim().toLowerCase();
+    const user = await this.usersService.findByEmail(sanitizedEmail);
+    
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (!user.emailVerified) {
+      throw new BadRequestException('Email is not verified. Please verify your email first.');
+    }
+
+    // Generate 6-digit login verification code (2FA)
+    const verificationCode = randomInt(100000, 999999).toString();
+    const verificationCodeExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
+
+    try {
+      await this.usersService.update(user.id, {
+        verificationCode,
+        verificationCodeExpiresAt,
+      });
+
+      const emailResult = await this.mailerService.sendLoginCodeEmail(user.email, verificationCode);
+      if (!emailResult) {
+        throw new Error('Failed to send email via MailerService');
+      }
+    } catch (error) {
+      this.logger.error(`Resend login verification failed for ${sanitizedEmail}: ${error.message}`);
+      throw new BadRequestException('Failed to resend login verification email. Please try again later.');
+    }
+
+    return {
+      message: 'Login verification code resent. Please check your email.',
       email: user.email,
     };
   }

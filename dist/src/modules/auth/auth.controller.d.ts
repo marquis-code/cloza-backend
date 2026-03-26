@@ -65,4 +65,10 @@ export declare class AuthController {
         message: string;
         email: string;
     }>;
+    resendLoginVerification(body: {
+        email: string;
+    }): Promise<{
+        message: string;
+        email: string;
+    }>;
 }

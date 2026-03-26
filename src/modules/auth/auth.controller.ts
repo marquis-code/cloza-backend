@@ -82,4 +82,12 @@ export class AuthController {
   async resendVerification(@Body() body: { email: string }) {
     return this.authService.resendVerificationEmail(body.email);
   }
+
+  @Post('resend-login-verification')
+  @ApiOperation({ summary: 'Resend login verification code' })
+  @ApiResponse({ status: 200, description: 'Login verification code resent' })
+  @ApiResponse({ status: 400, description: 'User not found or email not verified' })
+  async resendLoginVerification(@Body() body: { email: string }) {
+    return this.authService.resendLoginVerificationEmail(body.email);
+  }
 }
