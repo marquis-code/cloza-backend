@@ -10,9 +10,7 @@ export declare class UsersService {
     update(id: string, data: Prisma.UserUpdateInput): Promise<User>;
     getUserFeatures(userId: string): Promise<{
         activePlan: string;
-        planName: string;
-        features: string[];
-        featureSlugs: string[];
+        featureSlugs: Record<string, boolean>;
         limits: {
             socialAccounts: number;
             quickReplies: number;

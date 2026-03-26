@@ -9,6 +9,7 @@ export declare class AuthService {
     private mailerService;
     private firebaseService;
     private auditService;
+    private readonly logger;
     constructor(usersService: UsersService, jwtService: JwtService, mailerService: MailerService, firebaseService: FirebaseService, auditService: AuditService);
     validateUser(email: string, pass: string): Promise<any>;
     login(user: any): Promise<{
@@ -56,6 +57,10 @@ export declare class AuthService {
         message: string;
     }>;
     resendVerificationEmail(email: string): Promise<{
+        message: string;
+        email: string;
+    }>;
+    resendLoginVerificationEmail(email: string): Promise<{
         message: string;
         email: string;
     }>;

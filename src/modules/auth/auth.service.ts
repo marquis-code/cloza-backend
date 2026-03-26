@@ -318,4 +318,45 @@ export class AuthService {
       email: user.email,
     };
   }
+
+  async resendLoginVerificationEmail(email: string) {
+    if (!email) {
+      throw new BadRequestException('Email is required');
+    }
+
+    const sanitizedEmail = email.trim().toLowerCase();
+    const user = await this.usersService.findByEmail(sanitizedEmail);
+    
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    if (!user.emailVerified) {
+      throw new BadRequestException('Email is not verified. Please verify your email first.');
+    }
+
+    // Generate 6-digit login verification code (2FA)
+    const verificationCode = randomInt(100000, 999999).toString();
+    const verificationCodeExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
+
+    try {
+      await this.usersService.update(user.id, {
+        verificationCode,
+        verificationCodeExpiresAt,
+      });
+
+      const emailResult = await this.mailerService.sendLoginCodeEmail(user.email, verificationCode);
+      if (!emailResult) {
+        throw new Error('Failed to send email via MailerService');
+      }
+    } catch (error) {
+      this.logger.error(`Resend login verification failed for ${sanitizedEmail}: ${error.message}`);
+      throw new BadRequestException('Failed to resend login verification email. Please try again later.');
+    }
+
+    return {
+      message: 'Login verification code resent. Please check your email.',
+      email: user.email,
+    };
+  }
 }

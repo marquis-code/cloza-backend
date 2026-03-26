@@ -64,9 +64,7 @@ export declare class UsersController {
     }>;
     getMyFeatures(req: any): Promise<{
         activePlan: string;
-        planName: string;
-        features: string[];
-        featureSlugs: string[];
+        featureSlugs: Record<string, boolean>;
         limits: {
             socialAccounts: number;
             quickReplies: number;

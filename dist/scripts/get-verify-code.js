@@ -44,7 +44,6 @@ const prisma = new client_1.PrismaClient({ adapter });
 async function main() {
     const email = process.argv[2];
     if (!email) {
-        console.error('Email required');
         process.exit(1);
     }
     try {
@@ -52,7 +51,6 @@ async function main() {
             where: { email },
             select: { verificationCode: true }
         });
-        console.log(user?.verificationCode || 'NONE');
     }
     catch (error) {
         console.error('Error fetching code:', error);

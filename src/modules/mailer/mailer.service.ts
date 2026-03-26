@@ -44,15 +44,23 @@ export class MailerService {
             text-align: center;
             margin-bottom: 32px;
           }
+          .logo-table {
+            margin: 0 auto;
+          }
           .logo-img {
-            max-width: 120px;
-            margin-bottom: 12px;
+            width: 44px;
+            height: 44px;
+            display: block;
+            border: 0;
           }
           .logo-text { 
-            font-size: 24px; 
+            font-size: 32px; 
             font-weight: 800; 
-            color: #0f172a; 
+            color: #116c3b; 
             letter-spacing: -0.5px; 
+            margin: 0;
+            padding-left: 10px;
+            font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
           }
           
           .header { text-align: center; margin-bottom: 32px; }
@@ -113,9 +121,16 @@ export class MailerService {
       <body>
         <div class="email-wrapper">
           <div class="logo-container">
-            <!-- Using a placeholder for the logo. Suggestion: Update this URL once provided. -->
-            <img src="https://getcloza.com/logo.png" alt="Cloza Logo" class="logo-img" onerror="this.style.display='none'">
-            <div class="logo-text">Cloza</div>
+            <table class="logo-table" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="vertical-align: middle;">
+                  <img src="https://cloza.pages.dev/_astro/logo-main.CqlHCxyR.png" alt="Cloza Logo" class="logo-img" width="44" height="44" onerror="this.style.display='none'">
+                </td>
+                <td style="vertical-align: middle;">
+                  <div class="logo-text">Cloza</div>
+                </td>
+              </tr>
+            </table>
           </div>
           <div class="header">
             <div class="title-pill"><span>System Notification</span></div>

@@ -41,6 +41,7 @@ var __importStar = (this && this.__importStar) || (function () {
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var AuthService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
@@ -51,12 +52,13 @@ const bcrypt = __importStar(require("bcrypt"));
 const crypto_1 = require("crypto");
 const firebase_service_1 = require("../../common/firebase/firebase.service");
 const audit_service_1 = require("../audit/audit.service");
-let AuthService = class AuthService {
+let AuthService = AuthService_1 = class AuthService {
     usersService;
     jwtService;
     mailerService;
     firebaseService;
     auditService;
+    logger = new common_1.Logger(AuthService_1.name);
     constructor(usersService, jwtService, mailerService, firebaseService, auditService) {
         this.usersService = usersService;
         this.jwtService = jwtService;
@@ -270,7 +272,11 @@ let AuthService = class AuthService {
         return { message: 'Password reset successful.' };
     }
     async resendVerificationEmail(email) {
-        const user = await this.usersService.findByEmail(email);
+        if (!email) {
+            throw new common_1.BadRequestException('Email is required');
+        }
+        const sanitizedEmail = email.trim().toLowerCase();
+        const user = await this.usersService.findByEmail(sanitizedEmail);
         if (!user) {
             throw new common_1.BadRequestException('User not found');
         }
@@ -279,19 +285,61 @@ let AuthService = class AuthService {
         }
         const verificationCode = (0, crypto_1.randomInt)(100000, 999999).toString();
         const verificationCodeExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
-        await this.usersService.update(user.id, {
-            verificationCode,
-            verificationCodeExpiresAt,
-        });
-        await this.mailerService.sendVerificationEmail(user.email, verificationCode);
+        try {
+            await this.usersService.update(user.id, {
+                verificationCode,
+                verificationCodeExpiresAt,
+            });
+            const emailResult = await this.mailerService.sendVerificationEmail(user.email, verificationCode);
+            if (!emailResult) {
+                throw new Error('Failed to send email via MailerService');
+            }
+        }
+        catch (error) {
+            this.logger.error(`Resend verification failed for ${sanitizedEmail}: ${error.message}`);
+            throw new common_1.BadRequestException('Failed to resend verification email. Please try again later.');
+        }
         return {
             message: 'Verification code resent. Please check your email.',
             email: user.email,
         };
     }
+    async resendLoginVerificationEmail(email) {
+        if (!email) {
+            throw new common_1.BadRequestException('Email is required');
+        }
+        const sanitizedEmail = email.trim().toLowerCase();
+        const user = await this.usersService.findByEmail(sanitizedEmail);
+        if (!user) {
+            throw new common_1.BadRequestException('User not found');
+        }
+        if (!user.emailVerified) {
+            throw new common_1.BadRequestException('Email is not verified. Please verify your email first.');
+        }
+        const verificationCode = (0, crypto_1.randomInt)(100000, 999999).toString();
+        const verificationCodeExpiresAt = new Date(Date.now() + 5 * 60 * 1000);
+        try {
+            await this.usersService.update(user.id, {
+                verificationCode,
+                verificationCodeExpiresAt,
+            });
+            const emailResult = await this.mailerService.sendLoginCodeEmail(user.email, verificationCode);
+            if (!emailResult) {
+                throw new Error('Failed to send email via MailerService');
+            }
+        }
+        catch (error) {
+            this.logger.error(`Resend login verification failed for ${sanitizedEmail}: ${error.message}`);
+            throw new common_1.BadRequestException('Failed to resend login verification email. Please try again later.');
+        }
+        return {
+            message: 'Login verification code resent. Please check your email.',
+            email: user.email,
+        };
+    }
 };
 exports.AuthService = AuthService;
-exports.AuthService = AuthService = __decorate([
+exports.AuthService = AuthService = AuthService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [users_service_1.UsersService,
         jwt_1.JwtService,
