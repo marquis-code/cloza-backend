@@ -10,17 +10,27 @@ export declare class ConversationsController {
         workspaceId: string;
         customerId: string;
         platform: import("@prisma/client").$Enums.Platform;
-        lastMessageAt: Date;
+        lastUserMessageAt: Date | null;
+        optInStatus: boolean;
+        qualityRating: string | null;
+        relatedOrderId: string | null;
+        relatedCartId: string | null;
     }>;
     sendMessage(req: any, dto: CreateMessageDto): Promise<{
         id: string;
         createdAt: Date;
         content: string;
-        type: import("@prisma/client").$Enums.MessageType;
+        format: import("@prisma/client").$Enums.MessageFormat;
+        category: import("@prisma/client").$Enums.MessageCategory;
+        conversationId: string;
         senderId: string;
         senderType: import("@prisma/client").$Enums.SenderType;
+        intent: import("@prisma/client").$Enums.SenderIntent | null;
+        externalId: string | null;
+        confidence: number | null;
+        reasons: string[];
+        cost: import("@prisma/client-runtime-utils").Decimal | null;
         payload: import("@prisma/client/runtime/client").JsonValue | null;
-        conversationId: string;
     }>;
     getConversations(workspaceId: string): Promise<({
         customer: {
@@ -38,11 +48,17 @@ export declare class ConversationsController {
             id: string;
             createdAt: Date;
             content: string;
-            type: import("@prisma/client").$Enums.MessageType;
+            format: import("@prisma/client").$Enums.MessageFormat;
+            category: import("@prisma/client").$Enums.MessageCategory;
+            conversationId: string;
             senderId: string;
             senderType: import("@prisma/client").$Enums.SenderType;
+            intent: import("@prisma/client").$Enums.SenderIntent | null;
+            externalId: string | null;
+            confidence: number | null;
+            reasons: string[];
+            cost: import("@prisma/client-runtime-utils").Decimal | null;
             payload: import("@prisma/client/runtime/client").JsonValue | null;
-            conversationId: string;
         }[];
     } & {
         id: string;
@@ -51,16 +67,26 @@ export declare class ConversationsController {
         workspaceId: string;
         customerId: string;
         platform: import("@prisma/client").$Enums.Platform;
-        lastMessageAt: Date;
+        lastUserMessageAt: Date | null;
+        optInStatus: boolean;
+        qualityRating: string | null;
+        relatedOrderId: string | null;
+        relatedCartId: string | null;
     })[]>;
     getMessages(id: string): Promise<{
         id: string;
         createdAt: Date;
         content: string;
-        type: import("@prisma/client").$Enums.MessageType;
+        format: import("@prisma/client").$Enums.MessageFormat;
+        category: import("@prisma/client").$Enums.MessageCategory;
+        conversationId: string;
         senderId: string;
         senderType: import("@prisma/client").$Enums.SenderType;
+        intent: import("@prisma/client").$Enums.SenderIntent | null;
+        externalId: string | null;
+        confidence: number | null;
+        reasons: string[];
+        cost: import("@prisma/client-runtime-utils").Decimal | null;
         payload: import("@prisma/client/runtime/client").JsonValue | null;
-        conversationId: string;
     }[]>;
 }

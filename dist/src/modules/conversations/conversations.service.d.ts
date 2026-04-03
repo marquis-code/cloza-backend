@@ -1,8 +1,21 @@
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { SenderType, MessageType, Platform } from '@prisma/client';
+import { SenderType, MessageFormat, Platform, SenderIntent, EventType } from '@prisma/client';
+import { MessageClassifierService } from './services/message-classifier.service';
+import { BillingEngineService } from './services/billing-engine.service';
+import { RoutingService } from './services/routing.service';
+import { MetaProvider } from './providers/meta.provider';
+import { FallbackProvider } from './providers/fallback.provider';
+import { Queue } from 'bullmq';
 export declare class ConversationsService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private classifier;
+    private billing;
+    private routing;
+    private metaProvider;
+    private fallbackProvider;
+    private followupQueue;
+    private readonly logger;
+    constructor(prisma: PrismaService, classifier: MessageClassifierService, billing: BillingEngineService, routing: RoutingService, metaProvider: MetaProvider, fallbackProvider: FallbackProvider, followupQueue: Queue);
     startConversation(workspaceId: string, customerId: string, platform: Platform): Promise<{
         id: string;
         createdAt: Date;
@@ -10,23 +23,36 @@ export declare class ConversationsService {
         workspaceId: string;
         customerId: string;
         platform: import("@prisma/client").$Enums.Platform;
-        lastMessageAt: Date;
+        lastUserMessageAt: Date | null;
+        optInStatus: boolean;
+        qualityRating: string | null;
+        relatedOrderId: string | null;
+        relatedCartId: string | null;
     }>;
     sendMessage(senderId: string, senderType: SenderType, data: {
         conversationId: string;
         content: string;
-        type?: MessageType;
+        format?: MessageFormat;
+        eventType?: EventType;
+        senderIntent?: SenderIntent;
         payload?: any;
     }): Promise<{
         id: string;
         createdAt: Date;
         content: string;
-        type: import("@prisma/client").$Enums.MessageType;
+        format: import("@prisma/client").$Enums.MessageFormat;
+        category: import("@prisma/client").$Enums.MessageCategory;
+        conversationId: string;
         senderId: string;
         senderType: import("@prisma/client").$Enums.SenderType;
+        intent: import("@prisma/client").$Enums.SenderIntent | null;
+        externalId: string | null;
+        confidence: number | null;
+        reasons: string[];
+        cost: import("@prisma/client-runtime-utils").Decimal | null;
         payload: import("@prisma/client/runtime/client").JsonValue | null;
-        conversationId: string;
     }>;
+    private scheduleFollowUps;
     getConversations(workspaceId: string): Promise<({
         customer: {
             id: string;
@@ -43,11 +69,17 @@ export declare class ConversationsService {
             id: string;
             createdAt: Date;
             content: string;
-            type: import("@prisma/client").$Enums.MessageType;
+            format: import("@prisma/client").$Enums.MessageFormat;
+            category: import("@prisma/client").$Enums.MessageCategory;
+            conversationId: string;
             senderId: string;
             senderType: import("@prisma/client").$Enums.SenderType;
+            intent: import("@prisma/client").$Enums.SenderIntent | null;
+            externalId: string | null;
+            confidence: number | null;
+            reasons: string[];
+            cost: import("@prisma/client-runtime-utils").Decimal | null;
             payload: import("@prisma/client/runtime/client").JsonValue | null;
-            conversationId: string;
         }[];
     } & {
         id: string;
@@ -56,16 +88,26 @@ export declare class ConversationsService {
         workspaceId: string;
         customerId: string;
         platform: import("@prisma/client").$Enums.Platform;
-        lastMessageAt: Date;
+        lastUserMessageAt: Date | null;
+        optInStatus: boolean;
+        qualityRating: string | null;
+        relatedOrderId: string | null;
+        relatedCartId: string | null;
     })[]>;
     getMessages(conversationId: string): Promise<{
         id: string;
         createdAt: Date;
         content: string;
-        type: import("@prisma/client").$Enums.MessageType;
+        format: import("@prisma/client").$Enums.MessageFormat;
+        category: import("@prisma/client").$Enums.MessageCategory;
+        conversationId: string;
         senderId: string;
         senderType: import("@prisma/client").$Enums.SenderType;
+        intent: import("@prisma/client").$Enums.SenderIntent | null;
+        externalId: string | null;
+        confidence: number | null;
+        reasons: string[];
+        cost: import("@prisma/client-runtime-utils").Decimal | null;
         payload: import("@prisma/client/runtime/client").JsonValue | null;
-        conversationId: string;
     }[]>;
 }

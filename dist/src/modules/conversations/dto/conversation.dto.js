@@ -16,7 +16,7 @@ const client_1 = require("@prisma/client");
 class CreateMessageDto {
     conversationId;
     content;
-    type;
+    format;
     payload;
 }
 exports.CreateMessageDto = CreateMessageDto;
@@ -31,11 +31,11 @@ __decorate([
     __metadata("design:type", String)
 ], CreateMessageDto.prototype, "content", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: client_1.MessageType, default: client_1.MessageType.TEXT }),
-    (0, class_validator_1.IsEnum)(client_1.MessageType),
+    (0, swagger_1.ApiProperty)({ enum: client_1.MessageFormat, default: client_1.MessageFormat.TEXT }),
+    (0, class_validator_1.IsEnum)(client_1.MessageFormat),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
-], CreateMessageDto.prototype, "type", void 0);
+], CreateMessageDto.prototype, "format", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: { productId: '123' }, required: false }),
     (0, class_validator_1.IsOptional)(),

@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { PrismaService } from '../../common/prisma/prisma.service';
-import { OrderStatus, MessageType, SenderType } from '@prisma/client';
+import { OrderStatus, MessageFormat, SenderType, Platform } from '@prisma/client';
 import { ConversationsService } from '../conversations/conversations.service';
 import { MailerService } from '../mailer/mailer.service';
 
@@ -58,7 +58,7 @@ export class PaymentsService {
           {
             conversationId,
             content: `Here's the payment link for your order: ${paymentLink}`,
-            type: MessageType.PAYMENT_LINK,
+            format: MessageFormat.PAYMENT_LINK,
             payload: { orderId, paymentLink },
           },
         );

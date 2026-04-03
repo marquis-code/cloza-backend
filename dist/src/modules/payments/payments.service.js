@@ -62,7 +62,7 @@ let PaymentsService = PaymentsService_1 = class PaymentsService {
                 await this.conversationsService.sendMessage(order.workspaceId, client_1.SenderType.USER, {
                     conversationId,
                     content: `Here's the payment link for your order: ${paymentLink}`,
-                    type: client_1.MessageType.PAYMENT_LINK,
+                    format: client_1.MessageFormat.PAYMENT_LINK,
                     payload: { orderId, paymentLink },
                 });
             }

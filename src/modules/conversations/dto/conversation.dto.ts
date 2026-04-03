@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsEnum, IsOptional, IsJSON } from 'class-validator';
-import { SenderType, MessageType } from '@prisma/client';
+import { SenderType, MessageFormat } from '@prisma/client';
 
 export class CreateMessageDto {
     @ApiProperty({ example: 'conversation-id-123' })
@@ -11,10 +11,10 @@ export class CreateMessageDto {
     @IsString()
     content: string;
 
-    @ApiProperty({ enum: MessageType, default: MessageType.TEXT })
-    @IsEnum(MessageType)
+    @ApiProperty({ enum: MessageFormat, default: MessageFormat.TEXT })
+    @IsEnum(MessageFormat)
     @IsOptional()
-    type?: MessageType;
+    format?: MessageFormat;
 
     @ApiProperty({ example: { productId: '123' }, required: false })
     @IsOptional()

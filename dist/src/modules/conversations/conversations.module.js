@@ -10,14 +10,42 @@ exports.ConversationsModule = void 0;
 const common_1 = require("@nestjs/common");
 const conversations_service_1 = require("./conversations.service");
 const conversations_controller_1 = require("./conversations.controller");
+const message_classifier_service_1 = require("./services/message-classifier.service");
+const meta_provider_1 = require("./providers/meta.provider");
+const fallback_provider_1 = require("./providers/fallback.provider");
+const billing_engine_service_1 = require("./services/billing-engine.service");
+const routing_service_1 = require("./services/routing.service");
+const compliance_service_1 = require("./services/compliance.service");
+const bullmq_1 = require("@nestjs/bullmq");
+const followup_processor_1 = require("./processors/followup.processor");
 let ConversationsModule = class ConversationsModule {
 };
 exports.ConversationsModule = ConversationsModule;
 exports.ConversationsModule = ConversationsModule = __decorate([
     (0, common_1.Module)({
-        providers: [conversations_service_1.ConversationsService],
+        imports: [
+            bullmq_1.BullModule.registerQueue({
+                name: 'message-followup',
+            }),
+        ],
+        providers: [
+            conversations_service_1.ConversationsService,
+            message_classifier_service_1.MessageClassifierService,
+            meta_provider_1.MetaProvider,
+            fallback_provider_1.FallbackProvider,
+            billing_engine_service_1.BillingEngineService,
+            routing_service_1.RoutingService,
+            compliance_service_1.ComplianceService,
+            followup_processor_1.FollowUpProcessor,
+        ],
         controllers: [conversations_controller_1.ConversationsController],
-        exports: [conversations_service_1.ConversationsService],
+        exports: [
+            conversations_service_1.ConversationsService,
+            message_classifier_service_1.MessageClassifierService,
+            billing_engine_service_1.BillingEngineService,
+            routing_service_1.RoutingService,
+            compliance_service_1.ComplianceService,
+        ],
     })
 ], ConversationsModule);
 //# sourceMappingURL=conversations.module.js.map

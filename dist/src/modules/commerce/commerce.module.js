@@ -11,14 +11,16 @@ const common_1 = require("@nestjs/common");
 const commerce_service_1 = require("./commerce.service");
 const commerce_controller_1 = require("./commerce.controller");
 const mailer_module_1 = require("../mailer/mailer.module");
+const cart_module_1 = require("./cart/cart.module");
 let CommerceModule = class CommerceModule {
 };
 exports.CommerceModule = CommerceModule;
 exports.CommerceModule = CommerceModule = __decorate([
     (0, common_1.Module)({
-        imports: [mailer_module_1.MailerModule],
+        imports: [mailer_module_1.MailerModule, cart_module_1.CartModule],
         providers: [commerce_service_1.CommerceService],
         controllers: [commerce_controller_1.CommerceController],
+        exports: [commerce_service_1.CommerceService, cart_module_1.CartModule],
     })
 ], CommerceModule);
 //# sourceMappingURL=commerce.module.js.map
