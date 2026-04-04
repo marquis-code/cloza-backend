@@ -136,7 +136,7 @@ let WorkspacesService = class WorkspacesService {
                 workspace: true,
             }
         });
-        await this.mailerService.sendWorkspaceInvitation(member.user.email, 'A Team Member', member.workspace.name, `https://app.cloza.io/workspaces/${workspaceId}`);
+        await this.mailerService.sendWorkspaceInvitation(member.user.email, 'A Team Member', member.workspace.name, `https://app.getcloza.com/workspaces/${workspaceId}`);
         return member;
     }
 };

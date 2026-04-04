@@ -16,6 +16,7 @@ import { FirebaseModule } from './common/firebase/firebase.module';
 
 import { BullModule } from '@nestjs/bullmq';
 import { AuditModule } from './modules/audit/audit.module';
+import { SystemModule } from './modules/system/system.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { AuditModule } from './modules/audit/audit.module';
     MailerModule,
     FirebaseModule,
     AuditModule,
+    SystemModule,
   ],
   controllers: [AppController],
   providers: [AppService],

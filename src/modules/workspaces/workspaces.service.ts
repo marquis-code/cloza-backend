@@ -147,7 +147,7 @@ export class WorkspacesService {
       member.user.email,
       'A Team Member', // Ideally we'd pass the inviter's name
       member.workspace.name,
-      `https://app.cloza.io/workspaces/${workspaceId}`
+      `https://app.getcloza.com/workspaces/${workspaceId}`
     );
 
     return member;

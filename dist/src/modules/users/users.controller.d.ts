@@ -23,6 +23,7 @@ export declare class UsersController {
         deletedAt: Date | null;
         trialPlan: string | null;
         trialEndsAt: Date | null;
+        role: import("@prisma/client").$Enums.UserRole;
     } | null>;
     updateProfile(req: any, updateUserDto: UpdateUserDto): Promise<{
         id: string;
@@ -42,6 +43,7 @@ export declare class UsersController {
         deletedAt: Date | null;
         trialPlan: string | null;
         trialEndsAt: Date | null;
+        role: import("@prisma/client").$Enums.UserRole;
     }>;
     markAsOnboarded(req: any): Promise<{
         id: string;
@@ -61,6 +63,7 @@ export declare class UsersController {
         deletedAt: Date | null;
         trialPlan: string | null;
         trialEndsAt: Date | null;
+        role: import("@prisma/client").$Enums.UserRole;
     }>;
     getMyFeatures(req: any): Promise<{
         activePlan: string;

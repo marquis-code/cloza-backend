@@ -17,6 +17,7 @@ class CreateMessageDto {
     conversationId;
     content;
     format;
+    platform;
     payload;
 }
 exports.CreateMessageDto = CreateMessageDto;
@@ -36,6 +37,12 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateMessageDto.prototype, "format", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'WHATSAPP', enum: client_1.Platform }),
+    (0, class_validator_1.IsEnum)(client_1.Platform),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateMessageDto.prototype, "platform", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: { productId: '123' }, required: false }),
     (0, class_validator_1.IsOptional)(),

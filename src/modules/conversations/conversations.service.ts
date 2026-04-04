@@ -1,7 +1,7 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma/prisma.service';
 import { SenderType, MessageFormat, Platform, MessageCategory, SenderIntent, EventType } from '@prisma/client';
-import { MessageClassifierService } from './services/message-classifier.service';
+import { MessageClassifierService, ClassificationResult } from './services/message-classifier.service';
 import { BillingEngineService } from './services/billing-engine.service';
 import { RoutingService } from './services/routing.service';
 import { MetaProvider } from './providers/meta.provider';
@@ -41,6 +41,7 @@ export class ConversationsService {
         conversationId: string;
         content: string;
         format?: MessageFormat;
+        platform?: Platform;
         eventType?: EventType;
         senderIntent?: SenderIntent;
         payload?: any;
@@ -52,30 +53,40 @@ export class ConversationsService {
 
         if (!conversation) throw new BadRequestException('Conversation not found');
 
-        // 1. Classification
-        const classification = this.classifier.classifyMessage({
-            conversation: {
-                lastUserMessageAt: conversation.lastUserMessageAt,
-                relatedOrderId: conversation.relatedOrderId,
-                relatedCartId: conversation.relatedCartId,
-            },
-            eventType: data.eventType || EventType.MANUAL_MESSAGE,
-            senderIntent: data.senderIntent || SenderIntent.REPLY,
-            content: { text: data.content },
-        });
+        const platform = data.platform || conversation.platform;
 
-        if (classification.reasons.some(r => r.startsWith('blocked'))) {
-            this.logger.warn(`Message blocked: ${classification.reasons.join(', ')}`);
-            throw new BadRequestException(`Message sending blocked: ${classification.reasons[0]}`);
+        // 1. Classification & Billing (Only for WhatsApp)
+        let classification: ClassificationResult = {
+            category: MessageCategory.SERVICE,
+            confidence: 1.0,
+            reasons: ['platform_bypass'],
+        };
+        let cost = 0;
+
+        if (platform === Platform.WHATSAPP) {
+            classification = await this.classifier.classifyMessage({
+                conversation: {
+                    lastUserMessageAt: conversation.lastUserMessageAt,
+                    relatedOrderId: conversation.relatedOrderId,
+                    relatedCartId: conversation.relatedCartId,
+                },
+                eventType: data.eventType || EventType.MANUAL_MESSAGE,
+                senderIntent: data.senderIntent || SenderIntent.REPLY,
+                content: { text: data.content },
+            });
+
+            if (classification.reasons.some(r => r.startsWith('blocked'))) {
+                this.logger.warn(`Message blocked: ${classification.reasons.join(', ')}`);
+                throw new BadRequestException(`Message sending blocked: ${classification.reasons[0]}`);
+            }
+
+            cost = await this.billing.calculateMessageCost(
+                conversation.workspaceId,
+                conversation.customerId,
+                classification.category,
+                conversation.relatedOrderId || undefined
+            );
         }
-
-        // 2. Billing / Guardrails
-        const cost = await this.billing.calculateMessageCost(
-            conversation.workspaceId,
-            conversation.customerId,
-            classification.category,
-            conversation.relatedOrderId || undefined
-        );
 
         // 3. Routing
         const targetPlatform = await this.routing.routeMessage(conversation, conversation.customer);

@@ -26,6 +26,7 @@ export declare class JwtStrategy extends JwtStrategy_base {
         deletedAt: Date | null;
         trialPlan: string | null;
         trialEndsAt: Date | null;
+        role: import("@prisma/client").$Enums.UserRole;
     }>;
 }
 export {};

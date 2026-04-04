@@ -9,9 +9,11 @@ import { RoutingService } from './services/routing.service';
 import { ComplianceService } from './services/compliance.service';
 import { BullModule } from '@nestjs/bullmq';
 import { FollowUpProcessor } from './processors/followup.processor';
+import { SystemModule } from '../system/system.module';
 
 @Module({
   imports: [
+    SystemModule,
     BullModule.registerQueue({
       name: 'message-followup',
     }),

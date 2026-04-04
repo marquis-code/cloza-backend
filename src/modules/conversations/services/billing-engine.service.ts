@@ -1,24 +1,31 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service';
 import { MessageCategory } from '@prisma/client';
+import { SystemService } from '../../system/system.service';
 
 @Injectable()
 export class BillingEngineService {
   private readonly logger = new Logger(BillingEngineService.name);
 
-  // Hardcoded pricing tiers
+  // Hardcoded pricing tiers (Fallbacks)
   private readonly pricing = {
     [MessageCategory.SERVICE]: 0.00,
     [MessageCategory.UTILITY]: 0.05,
     [MessageCategory.MARKETING]: 0.10,
   };
 
-  private readonly UTILITY_LIMIT_PER_ORDER = 3;
-
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private systemService: SystemService,
+  ) {}
 
   async calculateMessageCost(workspaceId: string, customerId: string, category: MessageCategory, orderId?: string): Promise<number> {
-    let cost = this.pricing[category];
+    const config = await this.prisma.pricingConfig.findUnique({
+      where: { category }
+    });
+
+    // Use DB price if available, otherwise fallback to hardcoded defaults
+    let cost = config ? Number(config.price) : this.pricing[category];
 
     // Guardrail: Limit free/base utility messages per order
     if (category === MessageCategory.UTILITY && orderId) {
@@ -33,10 +40,12 @@ export class BillingEngineService {
         },
       });
 
-      if (utilityCount >= this.UTILITY_LIMIT_PER_ORDER) {
+      const limit = await this.systemService.getSystemConfig('billing_utility_limit', 3);
+      if (utilityCount >= limit) {
+        const surcharge = await this.systemService.getSystemConfig('billing_utility_surcharge', 0.02);
         // Charge extra if over limit
-        this.logger.log(`Utility limit exceeded for order ${orderId} (${utilityCount}/${this.UTILITY_LIMIT_PER_ORDER}). Charging extra.`);
-        cost += 0.02; // Extra surcharge
+        this.logger.log(`Utility limit exceeded for order ${orderId} (${utilityCount}/${limit}). Charging extra.`);
+        cost += surcharge;
       }
     }
 

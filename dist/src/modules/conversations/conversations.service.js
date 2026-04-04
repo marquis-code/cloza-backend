@@ -60,21 +60,30 @@ let ConversationsService = ConversationsService_1 = class ConversationsService {
         });
         if (!conversation)
             throw new common_1.BadRequestException('Conversation not found');
-        const classification = this.classifier.classifyMessage({
-            conversation: {
-                lastUserMessageAt: conversation.lastUserMessageAt,
-                relatedOrderId: conversation.relatedOrderId,
-                relatedCartId: conversation.relatedCartId,
-            },
-            eventType: data.eventType || client_1.EventType.MANUAL_MESSAGE,
-            senderIntent: data.senderIntent || client_1.SenderIntent.REPLY,
-            content: { text: data.content },
-        });
-        if (classification.reasons.some(r => r.startsWith('blocked'))) {
-            this.logger.warn(`Message blocked: ${classification.reasons.join(', ')}`);
-            throw new common_1.BadRequestException(`Message sending blocked: ${classification.reasons[0]}`);
+        const platform = data.platform || conversation.platform;
+        let classification = {
+            category: client_1.MessageCategory.SERVICE,
+            confidence: 1.0,
+            reasons: ['platform_bypass'],
+        };
+        let cost = 0;
+        if (platform === client_1.Platform.WHATSAPP) {
+            classification = await this.classifier.classifyMessage({
+                conversation: {
+                    lastUserMessageAt: conversation.lastUserMessageAt,
+                    relatedOrderId: conversation.relatedOrderId,
+                    relatedCartId: conversation.relatedCartId,
+                },
+                eventType: data.eventType || client_1.EventType.MANUAL_MESSAGE,
+                senderIntent: data.senderIntent || client_1.SenderIntent.REPLY,
+                content: { text: data.content },
+            });
+            if (classification.reasons.some(r => r.startsWith('blocked'))) {
+                this.logger.warn(`Message blocked: ${classification.reasons.join(', ')}`);
+                throw new common_1.BadRequestException(`Message sending blocked: ${classification.reasons[0]}`);
+            }
+            cost = await this.billing.calculateMessageCost(conversation.workspaceId, conversation.customerId, classification.category, conversation.relatedOrderId || undefined);
         }
-        const cost = await this.billing.calculateMessageCost(conversation.workspaceId, conversation.customerId, classification.category, conversation.relatedOrderId || undefined);
         const targetPlatform = await this.routing.routeMessage(conversation, conversation.customer);
         let externalId = null;
         try {

@@ -12,9 +12,9 @@ export declare class WorkspacesService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            role: import("@prisma/client").$Enums.UserRole;
             workspaceId: string;
             userId: string;
-            role: import("@prisma/client").$Enums.UserRole;
         }[];
         subscription: {
             id: string;
@@ -44,9 +44,9 @@ export declare class WorkspacesService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            role: import("@prisma/client").$Enums.UserRole;
             workspaceId: string;
             userId: string;
-            role: import("@prisma/client").$Enums.UserRole;
         }[];
     } & {
         id: string;
@@ -74,9 +74,9 @@ export declare class WorkspacesService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            role: import("@prisma/client").$Enums.UserRole;
             workspaceId: string;
             userId: string;
-            role: import("@prisma/client").$Enums.UserRole;
         })[];
         payoutAccounts: {
             id: string;
@@ -132,6 +132,7 @@ export declare class WorkspacesService {
             deletedAt: Date | null;
             trialPlan: string | null;
             trialEndsAt: Date | null;
+            role: import("@prisma/client").$Enums.UserRole;
         };
         workspace: {
             id: string;
@@ -150,8 +151,8 @@ export declare class WorkspacesService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        role: import("@prisma/client").$Enums.UserRole;
         workspaceId: string;
         userId: string;
-        role: import("@prisma/client").$Enums.UserRole;
     }>;
 }

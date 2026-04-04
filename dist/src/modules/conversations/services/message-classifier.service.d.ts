@@ -20,7 +20,10 @@ export interface ClassificationResult {
     confidence: number;
     reasons: string[];
 }
+import { SystemService } from '../../system/system.service';
 export declare class MessageClassifierService {
-    validateFollowUp(conversation: ConversationContext, eventType: EventType, now: Date): boolean;
-    classifyMessage(input: MessageInput): ClassificationResult;
+    private systemService;
+    constructor(systemService: SystemService);
+    validateFollowUp(conversation: ConversationContext, eventType: EventType, now: Date): Promise<boolean>;
+    classifyMessage(input: MessageInput): Promise<ClassificationResult>;
 }

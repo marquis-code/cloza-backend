@@ -18,12 +18,14 @@ const routing_service_1 = require("./services/routing.service");
 const compliance_service_1 = require("./services/compliance.service");
 const bullmq_1 = require("@nestjs/bullmq");
 const followup_processor_1 = require("./processors/followup.processor");
+const system_module_1 = require("../system/system.module");
 let ConversationsModule = class ConversationsModule {
 };
 exports.ConversationsModule = ConversationsModule;
 exports.ConversationsModule = ConversationsModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            system_module_1.SystemModule,
             bullmq_1.BullModule.registerQueue({
                 name: 'message-followup',
             }),

@@ -14,20 +14,25 @@ exports.BillingEngineService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../../common/prisma/prisma.service");
 const client_1 = require("@prisma/client");
+const system_service_1 = require("../../system/system.service");
 let BillingEngineService = BillingEngineService_1 = class BillingEngineService {
     prisma;
+    systemService;
     logger = new common_1.Logger(BillingEngineService_1.name);
     pricing = {
         [client_1.MessageCategory.SERVICE]: 0.00,
         [client_1.MessageCategory.UTILITY]: 0.05,
         [client_1.MessageCategory.MARKETING]: 0.10,
     };
-    UTILITY_LIMIT_PER_ORDER = 3;
-    constructor(prisma) {
+    constructor(prisma, systemService) {
         this.prisma = prisma;
+        this.systemService = systemService;
     }
     async calculateMessageCost(workspaceId, customerId, category, orderId) {
-        let cost = this.pricing[category];
+        const config = await this.prisma.pricingConfig.findUnique({
+            where: { category }
+        });
+        let cost = config ? Number(config.price) : this.pricing[category];
         if (category === client_1.MessageCategory.UTILITY && orderId) {
             const utilityCount = await this.prisma.message.count({
                 where: {
@@ -39,9 +44,11 @@ let BillingEngineService = BillingEngineService_1 = class BillingEngineService {
                     },
                 },
             });
-            if (utilityCount >= this.UTILITY_LIMIT_PER_ORDER) {
-                this.logger.log(`Utility limit exceeded for order ${orderId} (${utilityCount}/${this.UTILITY_LIMIT_PER_ORDER}). Charging extra.`);
-                cost += 0.02;
+            const limit = await this.systemService.getSystemConfig('billing_utility_limit', 3);
+            if (utilityCount >= limit) {
+                const surcharge = await this.systemService.getSystemConfig('billing_utility_surcharge', 0.02);
+                this.logger.log(`Utility limit exceeded for order ${orderId} (${utilityCount}/${limit}). Charging extra.`);
+                cost += surcharge;
             }
         }
         return cost;
@@ -71,6 +78,7 @@ let BillingEngineService = BillingEngineService_1 = class BillingEngineService {
 exports.BillingEngineService = BillingEngineService;
 exports.BillingEngineService = BillingEngineService = BillingEngineService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        system_service_1.SystemService])
 ], BillingEngineService);
 //# sourceMappingURL=billing-engine.service.js.map

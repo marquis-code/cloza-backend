@@ -198,7 +198,7 @@ let MailerService = MailerService_1 = class MailerService {
         });
     }
     async sendPasswordResetEmail(email, token) {
-        const resetLink = `https://app.cloza.io/reset-password?token=${token}`;
+        const resetLink = `https://app.getcloza.com/reset-password?token=${token}`;
         const subject = 'Reset Your Password - Cloza';
         const html = this.brandWrapper('Reset Password', `
       <p>We received a request to reset your password. Click the button below to set a new password for your account.</p>
@@ -222,7 +222,7 @@ let MailerService = MailerService_1 = class MailerService {
       <p>Your account is now fully set up and ready to go! Cloza helps you manage your business across all social platforms seamlessly.</p>
       <p>Start by connecting your first social account to begin tracking engagement and managing orders.</p>
       <div class="action-area">
-        <a href="https://app.cloza.io/dashboard" class="btn">Go to Dashboard</a>
+        <a href="https://app.getcloza.com/dashboard" class="btn">Go to Dashboard</a>
       </div>
       <p>We're excited to have you on board!</p>
       `);
@@ -268,7 +268,7 @@ let MailerService = MailerService_1 = class MailerService {
         </div>
       </div>
       <div class="action-area">
-        <a href="https://app.cloza.io/orders/${orderId}" class="btn">Track Order</a>
+        <a href="https://app.getcloza.com/orders/${orderId}" class="btn">Track Order</a>
       </div>
       `);
         return this.sendEmail({
@@ -283,7 +283,7 @@ let MailerService = MailerService_1 = class MailerService {
       <p>Hi ${merchantName}, you just made a new sale on <strong>${platform}</strong>!</p>
       <p>A new order with a value of <strong>${orderAmount}</strong> has been created. Log in to your dashboard to manage the fulfillment.</p>
       <div class="action-area">
-        <a href="https://app.cloza.io/dashboard/orders" class="btn">View Order</a>
+        <a href="https://app.getcloza.com/dashboard/orders" class="btn">View Order</a>
       </div>
       `);
         return this.sendEmail({

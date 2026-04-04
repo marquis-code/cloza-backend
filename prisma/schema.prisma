@@ -95,6 +95,7 @@ model User {
   deletedAt     DateTime?
   trialPlan     String?
   trialEndsAt   DateTime?
+  role          UserRole          @default(MEMBER)
   workspaces    WorkspaceMember[]
   auditLogs     AuditLog[]
 }
@@ -255,6 +256,23 @@ model Message {
   createdAt      DateTime        @default(now())
 
   conversation Conversation @relation(fields: [conversationId], references: [id])
+}
+
+model PricingConfig {
+  id        String          @id @default(uuid())
+  category  MessageCategory @unique
+  price     Decimal         @db.Decimal(10, 4)
+  updatedAt DateTime        @updatedAt
+  createdAt DateTime        @updatedAt
+}
+
+model SystemConfig {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  type      String   @default("string") // string, number, json
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
 }
 
 model Cart {

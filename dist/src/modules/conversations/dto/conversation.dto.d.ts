@@ -1,8 +1,9 @@
-import { MessageFormat } from '@prisma/client';
+import { MessageFormat, Platform } from '@prisma/client';
 export declare class CreateMessageDto {
     conversationId: string;
     content: string;
     format?: MessageFormat;
+    platform?: Platform;
     payload?: any;
 }
 export declare class StartConversationDto {

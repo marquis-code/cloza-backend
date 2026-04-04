@@ -26,14 +26,19 @@ export interface ClassificationResult {
   reasons: string[];
 }
 
+import { SystemService } from '../../system/system.service';
+
 @Injectable()
 export class MessageClassifierService {
+  constructor(private systemService: SystemService) {}
+
   /**
    * Determine if a follow-up is allowed based on context
    */
-  validateFollowUp(conversation: ConversationContext, eventType: EventType, now: Date): boolean {
+  async validateFollowUp(conversation: ConversationContext, eventType: EventType, now: Date): Promise<boolean> {
     const lastUserMsg = conversation.lastUserMessageAt;
-    const has24hWindow = lastUserMsg ? (now.getTime() - lastUserMsg.getTime()) < 24 * 3600 * 1000 : false;
+    const windowHours = await this.systemService.getSystemConfig('classification_service_window_hours', 24);
+    const hasWindow = lastUserMsg ? (now.getTime() - lastUserMsg.getTime()) < windowHours * 3600 * 1000 : false;
 
     const utilityEvents: EventType[] = [
       EventType.ORDER_CREATED,
@@ -42,33 +47,34 @@ export class MessageClassifierService {
       EventType.DELIVERY_UPDATE
     ];
 
-    // Allowed if within 24h or is a utility message tied to order/cart
+    // Allowed if within window or is a utility message tied to order/cart
     const isUtilityMessage = utilityEvents.includes(eventType) && (!!conversation.relatedOrderId || !!conversation.relatedCartId);
-    return has24hWindow || isUtilityMessage;
+    return hasWindow || isUtilityMessage;
   }
 
   /**
    * Core classifier function
    */
-  classifyMessage(input: MessageInput): ClassificationResult {
+  async classifyMessage(input: MessageInput): Promise<ClassificationResult> {
     const { conversation, eventType, senderIntent, content } = input;
     const now = input.now || new Date();
     const reasons: string[] = [];
 
     // 1️⃣ Enforce context-based follow-up
-    const canFollowUp = this.validateFollowUp(conversation, eventType, now);
+    const canFollowUp = await this.validateFollowUp(conversation, eventType, now);
     if (!canFollowUp) {
-      reasons.push("blocked: follow-up not allowed (outside 24h or no related order/cart)");
+      reasons.push("blocked: follow-up not allowed (outside window or no related order/cart)");
       return { category: MessageCategory.MARKETING, confidence: 1, reasons }; // treat as blocked marketing
     }
 
-    // 2️⃣ Within 24h → service
-    const has24hWindow = conversation.lastUserMessageAt
-      ? (now.getTime() - conversation.lastUserMessageAt.getTime()) < 24 * 3600 * 1000
+    // 2️⃣ Within window → service
+    const windowHours = await this.systemService.getSystemConfig('classification_service_window_hours', 24);
+    const hasWindow = conversation.lastUserMessageAt
+      ? (now.getTime() - conversation.lastUserMessageAt.getTime()) < windowHours * 3600 * 1000
       : false;
 
-    if (has24hWindow) {
-      reasons.push("within 24-hour user-initiated window");
+    if (hasWindow) {
+      reasons.push(`within ${windowHours}-hour user-initiated window`);
       return { category: MessageCategory.SERVICE, confidence: 1, reasons };
     }
 
@@ -91,12 +97,13 @@ export class MessageClassifierService {
     }
 
     // 5️⃣ Content heuristic detection
-    const promoKeywords = [
+    const defaultKeywords = [
       "discount", "sale", "offer", "promo",
       "buy now", "limited", "deal", "free"
     ];
+    const promoKeywords = await this.systemService.getSystemConfig('classification_promo_keywords', defaultKeywords);
     const textLower = content.text.toLowerCase();
-    const containsPromo = promoKeywords.some(word => textLower.includes(word));
+    const containsPromo = promoKeywords.some((word: string) => textLower.includes(word.toLowerCase()));
     if (containsPromo) {
       reasons.push("contains promotional keyword");
       return { category: MessageCategory.MARKETING, confidence: 0.85, reasons };

@@ -65,14 +65,15 @@ export declare class CommerceService {
                     deletedAt: Date | null;
                     trialPlan: string | null;
                     trialEndsAt: Date | null;
+                    role: import("@prisma/client").$Enums.UserRole;
                 };
             } & {
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
+                role: import("@prisma/client").$Enums.UserRole;
                 workspaceId: string;
                 userId: string;
-                role: import("@prisma/client").$Enums.UserRole;
             })[];
         } & {
             id: string;
